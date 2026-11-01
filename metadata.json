@@ -1,0 +1,6 @@
+{
+  "name": "DsaHack",
+  "description": "Code. Compete. Conquer. An energetic programming practice and DSA learning platform featuring Neo-Brutalist & Bento UI, multi-language practice, coding workspace, AI DSA Mentor, contests, and gamified progress.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
