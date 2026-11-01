@@ -18,16 +18,23 @@ interface AuthPageProps {
   initialMode?: 'login' | 'signup' | 'forgot_password';
   onNavigate: (screen: ScreenId) => void;
   onLoginSuccess: (user: UserProfile) => void;
+  redirectNotice?: string | null;
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({
   initialMode = 'login',
   onNavigate,
   onLoginSuccess,
+  redirectNotice,
 }) => {
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot_password' | 'reset_password' | 'verify_email'>(
     initialMode
   );
+
+  // Synchronize mode whenever initialMode prop changes
+  React.useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   // Form states
   const [fullName, setFullName] = useState('');
@@ -154,9 +161,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               <span>Back to Home</span>
             </button>
 
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-[#F4A6C1] neo-border flex items-center justify-center font-bold text-[#171717]">
-                <Code2 className="w-5 h-5 text-[#171717]" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
+                <img
+                  src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                  alt="DsaHack Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-2xl font-extrabold text-[#171717] dark:text-white">
                 Dsa<span className="text-[#F4A6C1]">Hack</span>
@@ -219,6 +230,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 {mode === 'verify_email' && 'Check Your Email'}
               </h2>
             </div>
+
+            {/* Prompt Notice for First-Time / Unauthenticated Access */}
+            {redirectNotice && (
+              <div className="p-3.5 rounded-xl bg-[#FFF0B3] neo-border-sm text-xs font-bold text-[#171717] flex items-center gap-2.5 shadow-[2px_2px_0px_0px_#171717]">
+                <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>{redirectNotice}</span>
+              </div>
+            )}
 
             {/* Notification & Error Banners */}
             {statusMessage && (

@@ -13,9 +13,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#F4A6C1] neo-border flex items-center justify-center font-bold text-[#171717] shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
-              <Code2 className="w-4 h-4 text-[#171717]" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
+              <img
+                src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                alt="DsaHack Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-[#171717] dark:text-white">
               Dsa<span className="text-[#F4A6C1]">Hack</span>

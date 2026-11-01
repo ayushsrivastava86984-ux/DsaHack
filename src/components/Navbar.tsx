@@ -49,10 +49,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => onNavigate('landing')}
-            className="flex items-center gap-2 group text-left focus:outline-none"
+            className="flex items-center gap-2.5 group text-left focus:outline-none"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#F4A6C1] neo-border flex items-center justify-center font-bold text-[#171717] group-hover:rotate-6 transition-transform shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
-              <Code2 className="w-5 h-5 text-[#171717]" />
+            <div className="w-10 h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center group-hover:scale-105 transition-transform shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
+              <img
+                src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                alt="DsaHack Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-[#171717] dark:text-[#FFFFFF] leading-none">

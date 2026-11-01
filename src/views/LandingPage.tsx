@@ -111,8 +111,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button
                     key={lang}
                     onClick={() => {
-                      if (onSelectLanguage) onSelectLanguage(lang.toLowerCase());
-                      onNavigate('language_practice');
+                      if (onSelectLanguage) {
+                        onSelectLanguage(lang.toLowerCase());
+                      } else {
+                        onNavigate('language_practice');
+                      }
                     }}
                     className="px-2.5 py-1 text-xs font-extrabold neo-border-sm rounded-md shadow-[1.5px_1.5px_0px_0px_#171717] dark:shadow-[1.5px_1.5px_0px_0px_#383838] text-[#171717] hover:scale-105 transition-transform"
                     style={{ backgroundColor: bgColors[idx] }}
@@ -733,7 +736,7 @@ for i, num in enumerate(nums):
               onClick={() => onNavigate('dsa_questions')}
               className="px-8 py-4 rounded-xl bg-white dark:bg-[#2a2a2a] text-[#171717] dark:text-white neo-border font-bold text-base neo-btn neo-shadow"
             >
-              Browse Problems Without Account
+              Explore & Solve DSA Problems
             </button>
           </div>
         </div>
