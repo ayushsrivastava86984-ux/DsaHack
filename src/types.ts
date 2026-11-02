@@ -50,6 +50,8 @@ export interface Problem {
   testCases: TestCase[];
   companyTags: string[];
   isDaily?: boolean;
+  isPublished?: boolean;
+  hiddenTestCases?: TestCase[];
 }
 
 export interface Submission {

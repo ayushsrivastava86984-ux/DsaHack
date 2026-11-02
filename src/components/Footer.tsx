@@ -129,7 +129,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 Account Settings
               </button>
             </li>
-
+            <li>
+              <button 
+                onClick={() => onNavigate('admin_dashboard')} 
+                className="hover:text-[#F4A6C1] dark:hover:text-[#F4A6C1] flex items-center gap-1 font-semibold text-gray-700 dark:text-gray-300"
+              >
+                <span>🛡️ Internal Admin Console</span>
+              </button>
+            </li>
           </ul>
         </div>
       </div>

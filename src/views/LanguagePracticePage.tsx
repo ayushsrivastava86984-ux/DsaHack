@@ -22,6 +22,7 @@ interface LanguagePracticePageProps {
   bookmarkedIds: string[];
   solvedIds: string[];
   onToggleBookmark: (id: string) => void;
+  problems?: Problem[];
 }
 
 export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
@@ -32,6 +33,7 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
   bookmarkedIds,
   solvedIds,
   onToggleBookmark,
+  problems = INITIAL_PROBLEMS,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | 'Easy' | 'Medium' | 'Hard'>('All');
@@ -45,7 +47,10 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
   const advancedTopics = ['Dynamic Programming', 'Graphs', 'Memory Management', 'Pointers', 'STL'];
 
   // Filter problems based on language, search, difficulty, status
-  const filteredProblems = INITIAL_PROBLEMS.filter((p) => {
+  const filteredProblems = problems.filter((p) => {
+    // Only published problems visible to students
+    if (p.isPublished === false) return false;
+
     // Matches language
     if (!p.languageTags.includes(language)) return false;
 

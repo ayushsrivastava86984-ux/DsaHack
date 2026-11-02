@@ -22,6 +22,7 @@ interface DsaQuestionListingPageProps {
   bookmarkedIds: string[];
   solvedIds: string[];
   onToggleBookmark: (id: string) => void;
+  problems?: Problem[];
 }
 
 export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
@@ -32,6 +33,7 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
   bookmarkedIds,
   solvedIds,
   onToggleBookmark,
+  problems = INITIAL_PROBLEMS,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | Difficulty>('All');
@@ -40,7 +42,10 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
   const companies = ['All', 'Google', 'Meta', 'Amazon', 'Microsoft', 'Apple', 'Netflix', 'Uber'];
 
-  const filteredProblems = INITIAL_PROBLEMS.filter((p) => {
+  const filteredProblems = problems.filter((p) => {
+    // Only published problems visible to students
+    if (p.isPublished === false) return false;
+
     // Topic filter
     if (selectedTopic !== 'All' && p.topic !== selectedTopic) {
       return false;

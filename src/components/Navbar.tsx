@@ -11,7 +11,8 @@ import {
   UserPlus,
   LogIn,
   LogOut,
-  User
+  User,
+  ShieldCheck
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -109,6 +110,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Simple Auth State: Sign In & Sign Up buttons or user controls when logged in */}
           {user ? (
             <div className="flex items-center gap-2">
+              {user.role === 'admin' && (
+                <button
+                  onClick={() => onNavigate('admin_dashboard')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-extrabold neo-border-sm transition-all shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838] ${
+                    currentScreen === 'admin_dashboard'
+                      ? 'bg-[#F4A6C1] text-[#171717]'
+                      : 'bg-[#171717] text-[#F4A6C1] dark:bg-[#2c2c2c] dark:text-[#F4A6C1]'
+                  }`}
+                  title="Open Internal Admin Console"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Admin</span>
+                </button>
+              )}
+
               <button
                 onClick={() => onNavigate('dashboard')}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm neo-btn text-xs font-bold shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]"
@@ -213,15 +229,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </>
             ) : (
-              <button
-                onClick={() => {
-                  onNavigate('dashboard');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2 text-center rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm text-xs font-bold"
-              >
-                Go to Dashboard
-              </button>
+              <div className="w-full space-y-2">
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => {
+                      onNavigate('admin_dashboard');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2 text-center rounded-lg bg-[#171717] text-[#F4A6C1] dark:bg-[#F4A6C1] dark:text-[#171717] neo-border-sm text-xs font-extrabold flex items-center justify-center gap-1.5"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Open Admin Console</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    onNavigate('dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2 text-center rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm text-xs font-bold"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
             )}
           </div>
         </div>

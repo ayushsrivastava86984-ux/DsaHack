@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScreenId, Language, TopicName, Problem, UserProfile } from './types';
 import { INITIAL_PROBLEMS } from './data/mockData';
+import { ShieldCheck } from 'lucide-react';
 
 // Views
 import { LandingPage } from './views/LandingPage';
@@ -22,9 +23,66 @@ import { StudentProfilePage } from './views/StudentProfilePage';
 import { AchievementsPage } from './views/AchievementsPage';
 import { PersonalNotesPage } from './views/PersonalNotesPage';
 import { SettingsPage } from './views/SettingsPage';
+import { AdminDashboard } from './views/AdminDashboard';
+import { INITIAL_USER } from './data/mockData';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('landing');
+
+  // Dynamic problem repository: initialized with INITIAL_PROBLEMS + persisted changes in localStorage
+  const [problems, setProblems] = useState<Problem[]>(() => {
+    try {
+      const saved = localStorage.getItem('dsahack_custom_questions');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load custom questions from storage', e);
+    }
+    return INITIAL_PROBLEMS;
+  });
+
+  const saveProblems = (updated: Problem[]) => {
+    setProblems(updated);
+    try {
+      localStorage.setItem('dsahack_custom_questions', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Could not save questions to localStorage', e);
+    }
+  };
+
+  const handleAddProblem = (newProb: Problem) => {
+    const updated = [newProb, ...problems];
+    saveProblems(updated);
+  };
+
+  const handleUpdateProblem = (updatedProb: Problem) => {
+    const updated = problems.map((p) => (p.id === updatedProb.id ? updatedProb : p));
+    saveProblems(updated);
+    if (selectedProblem.id === updatedProb.id) {
+      setSelectedProblem(updatedProb);
+    }
+  };
+
+  const handleDeleteProblem = (id: string) => {
+    const updated = problems.filter((p) => p.id !== id);
+    saveProblems(updated);
+  };
+
+  const handleTogglePublishProblem = (id: string) => {
+    const updated = problems.map((p) =>
+      p.id === id ? { ...p, isPublished: p.isPublished === false ? true : false } : p
+    );
+    saveProblems(updated);
+  };
+
+  const handleBulkImportProblems = (newBatch: Problem[]) => {
+    const updated = [...newBatch, ...problems];
+    saveProblems(updated);
+  };
 
   // User profile state - restored from localStorage if available, starts null for first-time visitors
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -35,6 +93,37 @@ export default function App() {
       return null;
     }
   });
+
+  // Admin passcode authorization state for elevating to admin role
+  const [adminPasscodeInput, setAdminPasscodeInput] = useState('');
+  const [adminPasscodeError, setAdminPasscodeError] = useState<string | null>(null);
+
+  const handleAdminElevation = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminPasscodeError(null);
+    if (adminPasscodeInput.trim() === 'dsahack-admin-2026') {
+      const adminProfile: UserProfile = user
+        ? { ...user, role: 'admin' }
+        : {
+            ...INITIAL_USER,
+            id: 'admin-001',
+            name: 'DsaHack Admin',
+            username: 'admin',
+            email: 'admin@dsahack.dev',
+            role: 'admin',
+          };
+      setUser(adminProfile);
+      try {
+        localStorage.setItem('dsahack_user', JSON.stringify(adminProfile));
+      } catch (err) {
+        console.warn('Could not persist admin profile', err);
+      }
+      setAdminPasscodeInput('');
+      setCurrentScreen('admin_dashboard');
+    } else {
+      setAdminPasscodeError('Invalid passcode. Use internal admin key: dsahack-admin-2026');
+    }
+  };
 
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('python');
   const [selectedTopic, setSelectedTopic] = useState<TopicName | 'All'>('All');
@@ -346,6 +435,7 @@ export default function App() {
               bookmarkedIds={bookmarkedIds}
               solvedIds={solvedIds}
               onToggleBookmark={handleToggleBookmark}
+              problems={problems}
             />
           )}
 
@@ -365,6 +455,7 @@ export default function App() {
               bookmarkedIds={bookmarkedIds}
               solvedIds={solvedIds}
               onToggleBookmark={handleToggleBookmark}
+              problems={problems}
             />
           )}
 
@@ -527,6 +618,82 @@ export default function App() {
                 onLoginSuccess={handleLoginSuccess}
                 redirectNotice={redirectNotice || 'Please sign up or log in to manage settings.'}
               />
+            )
+          )}
+
+          {currentScreen === 'admin_dashboard' && (
+            user?.role === 'admin' ? (
+              <AdminDashboard
+                onNavigate={handleNavigate}
+                problems={problems}
+                onAddProblem={handleAddProblem}
+                onUpdateProblem={handleUpdateProblem}
+                onDeleteProblem={handleDeleteProblem}
+                onTogglePublish={handleTogglePublishProblem}
+                onBulkImport={handleBulkImportProblems}
+                currentUser={user}
+              />
+            ) : (
+              <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-white dark:bg-[#212121] neo-border rounded-2xl neo-shadow-lg p-6 sm:p-8 space-y-6">
+                  <div className="w-14 h-14 rounded-2xl bg-[#171717] text-[#F4A6C1] neo-border-sm flex items-center justify-center shadow-[3px_3px_0px_0px_#171717] dark:shadow-[3px_3px_0px_0px_#383838]">
+                    <ShieldCheck className="w-8 h-8" />
+                  </div>
+
+                  <div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                      Restricted Access
+                    </span>
+                    <h2 className="text-2xl font-extrabold text-[#171717] dark:text-white mt-1.5">
+                      Internal Admin Gate
+                    </h2>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                      This console allows modifying questions, bulk uploading 80–100 test fixtures via JSON/CSV, configuring hidden test cases, and publishing live curriculum. Enter the platform admin key to unlock administrative privileges.
+                    </p>
+                  </div>
+
+                  {adminPasscodeError && (
+                    <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-xs font-bold neo-border-sm">
+                      {adminPasscodeError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleAdminElevation} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                        Admin Authorization Passcode
+                      </label>
+                      <input
+                        type="password"
+                        value={adminPasscodeInput}
+                        onChange={(e) => setAdminPasscodeInput(e.target.value)}
+                        placeholder="••••••••••••••••"
+                        required
+                        className="w-full px-3.5 py-2.5 rounded-xl neo-border-sm bg-[#FFF4E6]/50 dark:bg-[#1a1a1a] text-sm text-[#171717] dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#F4A6C1]"
+                      />
+                      <p className="text-[11px] text-gray-400 mt-1 font-mono">
+                        Internal key: dsahack-admin-2026
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handleNavigate('landing')}
+                        className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 py-2.5 rounded-xl bg-[#F4A6C1] text-[#171717] text-xs font-extrabold neo-border-sm neo-btn shadow-[2px_2px_0px_0px_#171717]"
+                      >
+                        Unlock Admin
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             )
           )}
         </main>
