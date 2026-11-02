@@ -38,10 +38,10 @@ export const AchievementsPage: React.FC<AchievementsPageProps> = ({ user, onNavi
   const unlockedCount = ACHIEVEMENTS.filter((b) => b.unlocked).length;
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+    <div className="py-6 sm:py-12 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-10">
       
       {/* Editorial Header */}
-      <div className="p-8 sm:p-12 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow-lg flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="p-4 sm:p-8 md:p-12 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
         
         <div className="space-y-4 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#FFF0B3] text-[#171717] neo-border-sm text-xs font-bold">
@@ -49,7 +49,7 @@ export const AchievementsPage: React.FC<AchievementsPageProps> = ({ user, onNavi
             <span>Gamification & Trophy Room</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#171717] dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#171717] dark:text-white tracking-tight">
             Level {user.level} · <br />
             <span className="text-[#F4A6C1]">Binary Alchemist</span>
           </h1>

@@ -150,7 +150,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       <div className="w-full max-w-7xl mx-auto my-auto grid grid-cols-1 lg:grid-cols-12 min-h-[640px] border-y-2 lg:border-2 border-[#171717] dark:border-[#383838] lg:rounded-3xl overflow-hidden bg-white dark:bg-[#212121] neo-shadow-lg lg:my-10">
         
         {/* LEFT SIDE: DsaHack Branding & Illustration */}
-        <div className="lg:col-span-5 bg-[#FFF4E6] dark:bg-[#1a1a1a] p-8 sm:p-12 flex flex-col justify-between border-b-2 lg:border-b-0 lg:border-r-2 border-[#171717] dark:border-[#383838] relative overflow-hidden">
+        <div className="lg:col-span-5 bg-[#FFF4E6] dark:bg-[#1a1a1a] p-4 sm:p-8 lg:p-12 flex flex-col justify-between border-b-2 lg:border-b-0 lg:border-r-2 border-[#171717] dark:border-[#383838] relative overflow-hidden">
           
           <div className="space-y-4 relative z-10">
             <button 
@@ -203,7 +203,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         </div>
 
         {/* RIGHT SIDE: Authentication Form */}
-        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center bg-white dark:bg-[#212121]">
+        <div className="lg:col-span-7 p-4 sm:p-8 lg:p-12 flex flex-col justify-center bg-white dark:bg-[#212121]">
           
           <div className="max-w-md w-full mx-auto space-y-6">
             
@@ -385,7 +385,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#FFF4E6] dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400">
-                  🛡️ <strong>Single Public Registration:</strong> All accounts are registered with free Student privileges. Internal administrative access requires authorization via secure server-side credentials.
+                  ⚡ <strong>Free Student Membership:</strong> Instant access to all DSA topics, coding workspace, test case runner, contests, and peer leaderboards.
                 </div>
 
                 <button

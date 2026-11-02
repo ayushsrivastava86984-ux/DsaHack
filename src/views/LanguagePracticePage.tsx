@@ -279,7 +279,82 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* MOBILE CARD VIEW (screens < md) */}
+        <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+          {filteredProblems.map((p) => {
+            const isSolved = solvedIds.includes(p.id);
+            const isBookmarked = bookmarkedIds.includes(p.id);
+
+            return (
+              <div key={p.id} className="p-4 space-y-3 hover:bg-gray-50 dark:hover:bg-[#262626] transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                        p.difficulty === 'Easy'
+                          ? 'bg-[#D8EEDC] text-emerald-950'
+                          : p.difficulty === 'Medium'
+                          ? 'bg-[#FFF0B3] text-amber-950'
+                          : 'bg-[#F4A6C1] text-rose-950'
+                      }`}>
+                        {p.difficulty}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        {p.topic}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        onSelectProblem(p);
+                        onNavigate('problem_detail');
+                      }}
+                      className="text-left font-extrabold text-sm text-[#171717] dark:text-white hover:text-[#e05688] transition-colors block pt-1"
+                    >
+                      {p.number}. {p.title}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => onToggleBookmark(p.id)}
+                    className="p-2 rounded-lg text-gray-400 hover:text-amber-500 transition-colors shrink-0"
+                    title={isBookmarked ? 'Remove Bookmark' : 'Bookmark Problem'}
+                    aria-label="Bookmark Problem"
+                  >
+                    <Bookmark className={`w-5 h-5 ${isBookmarked ? 'text-amber-500 fill-amber-500' : ''}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="text-[11px] font-mono text-gray-500">
+                    {isSolved ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Solved</span>
+                      </span>
+                    ) : (
+                      <span>Acceptance: {p.acceptance}</span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      onSelectProblem(p);
+                      onNavigate('problem_detail');
+                    }}
+                    className="min-h-[38px] px-4 py-2 rounded-xl bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-extrabold flex items-center gap-1.5 shadow-[1.5px_1.5px_0px_0px_#171717]"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Practice in {currentLang.name}</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* DESKTOP TABLE VIEW (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-gray-200 dark:border-gray-800 text-gray-500 font-bold uppercase tracking-wider bg-gray-50/50 dark:bg-transparent">
               <tr>
@@ -330,10 +405,10 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
                     <td className="py-3.5 px-4 font-bold">
                       <span className={
                         p.difficulty === 'Easy'
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-emerald-600 dark:text-emerald-400 font-extrabold'
                           : p.difficulty === 'Medium'
-                          ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-rose-600 dark:text-rose-400'
+                          ? 'text-amber-600 dark:text-amber-400 font-extrabold'
+                          : 'text-rose-600 dark:text-rose-400 font-extrabold'
                       }>
                         {p.difficulty}
                       </span>

@@ -75,17 +75,17 @@ export const PersonalNotesPage: React.FC<PersonalNotesPageProps> = ({
   });
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+    <div className="py-6 sm:py-12 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Editorial Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 p-4 sm:p-6 md:p-8 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#FFF0B3] text-[#171717] neo-border-sm text-xs font-bold">
             <BookOpen className="w-3.5 h-3.5 text-amber-800" />
             <span>Personal Revision Vault</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#171717] dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#171717] dark:text-white tracking-tight">
             Personal Notes & <br />
             <span className="text-[#F4A6C1]">Wrong Answer Notebook.</span>
           </h1>

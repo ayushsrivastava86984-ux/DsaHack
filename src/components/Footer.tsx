@@ -108,10 +108,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </ul>
         </div>
 
-        {/* Account & Administration */}
+        {/* Account & Community */}
         <div className="space-y-3">
           <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-            Platform & Admin
+            Community & Account
           </h4>
           <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <li>
@@ -129,24 +129,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 Account Settings
               </button>
             </li>
-            <li>
-              <button 
-                onClick={() => onNavigate('admin_dashboard')} 
-                className="hover:text-[#F4A6C1] dark:hover:text-[#F4A6C1] flex items-center gap-1 font-semibold text-gray-700 dark:text-gray-300"
-              >
-                <span>🛡️ Internal Admin Console</span>
-              </button>
-            </li>
           </ul>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-300 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
-        <p>© 2026 DsaHack Inc. Engineered for competitive programmers and interview candidates.</p>
-        <div className="flex items-center gap-4">
-          <span>Single Public Student Registration Policy</span>
+      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-300 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400 text-center sm:text-left">
+        <p>© 2026 DsaHack Inc. Engineered for competitive programmers and tech interview candidates.</p>
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4">
+          <span>Student DSA Platform</span>
           <span>·</span>
-          <span>Protected Internal Role RBAC</span>
+          <span>Supabase Powered</span>
           <span>·</span>
           <span>WCAG AA Contrast Compliant</span>
         </div>

@@ -257,3 +257,37 @@ export async function fetchPublishedProblems(): Promise<{
     return { problems: [], error: new Error(message) };
   }
 }
+
+/**
+ * Fetches the full question details for a single problem by database UUID or problem_id
+ */
+export async function fetchProblemByIdOrSlug(idOrProblemId: string): Promise<{
+  problem: Problem | null;
+  error: Error | null;
+}> {
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrProblemId);
+    let query = supabase.from('problems').select('*').eq('is_published', true);
+
+    if (isUuid) {
+      query = query.eq('id', idOrProblemId);
+    } else {
+      query = query.or(`problem_id.eq.${idOrProblemId},id.eq.${idOrProblemId}`);
+    }
+
+    const { data, error } = await query.limit(1);
+    if (error) {
+      console.error('[Supabase problemsService] Error fetching problem detail:', error);
+      return { problem: null, error: new Error(error.message) };
+    }
+
+    if (data && data.length > 0) {
+      return { problem: mapSupabaseProblemToModel(data[0] as SupabaseProblemRow), error: null };
+    }
+
+    return { problem: null, error: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { problem: null, error: new Error(message) };
+  }
+}

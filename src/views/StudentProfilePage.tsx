@@ -51,10 +51,10 @@ export const StudentProfilePage: React.FC<StudentProfilePageProps> = ({
   );
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+    <div className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       
       {/* PROFILE HEADER CARD */}
-      <div className="p-8 rounded-3xl bg-white dark:bg-[#212121] neo-border neo-shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-white dark:bg-[#212121] neo-border neo-shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
         
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <div className="relative">
@@ -109,7 +109,7 @@ export const StudentProfilePage: React.FC<StudentProfilePageProps> = ({
       </div>
 
       {/* STATS BENTO ROW: 4 Core Indicators */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         
         <div className="p-5 rounded-2xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow text-[#171717] dark:text-white">
           <p className="text-[11px] font-bold text-gray-500 uppercase">Solved Count</p>
@@ -203,7 +203,7 @@ export const StudentProfilePage: React.FC<StudentProfilePageProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {ACHIEVEMENTS.slice(0, 4).map((badge) => (
               <div 
                 key={badge.id}

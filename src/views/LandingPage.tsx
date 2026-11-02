@@ -20,7 +20,6 @@ import {
   Award,
   BookOpen,
   Calendar,
-  ShieldCheck,
   Building2,
   Lock,
   Clock,

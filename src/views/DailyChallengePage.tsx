@@ -56,13 +56,13 @@ export const DailyChallengePage: React.FC<DailyChallengePageProps> = ({
   });
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+    <div className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-10">
       
       {/* Editorial Mission Hero */}
       <div className="flex flex-col lg:flex-row items-stretch gap-6">
         
         {/* Main Mission Card (8 Cols) */}
-        <div className="flex-1 p-8 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow-lg flex flex-col justify-between space-y-6">
+        <div className="flex-1 p-4 sm:p-6 md:p-8 rounded-3xl bg-[#FFF4E6] dark:bg-[#212121] neo-border neo-shadow-lg flex flex-col justify-between space-y-6">
           
           <div className="space-y-3">
             <div className="flex items-center justify-between">

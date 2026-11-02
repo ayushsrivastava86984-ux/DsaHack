@@ -72,7 +72,7 @@ export interface UserProfile {
   name: string;
   username: string;
   email: string;
-  role: 'student' | 'admin';
+  role: 'student';
   avatar: string;
   bio: string;
   college?: string;
@@ -151,8 +151,4 @@ export type ScreenId =
   | 'profile'
   | 'achievements'
   | 'notes'
-  | 'settings'
-  | 'admin_dashboard'
-  | 'admin_questions'
-  | 'admin_users'
-  | 'admin_contests';
+  | 'settings';

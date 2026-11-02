@@ -4,7 +4,6 @@ import { useTheme } from '../context/ThemeContext';
 import { 
   Sun, 
   Moon, 
-  Code2, 
   Menu, 
   X,
   Flame,
@@ -12,7 +11,10 @@ import {
   LogIn,
   LogOut,
   User,
-  ShieldCheck
+  LayoutDashboard,
+  Settings,
+  Trophy,
+  BookOpen
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -42,17 +44,22 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: 'Daily Mission', screen: 'daily_challenge' },
   ];
 
+  const handleMobileNav = (screen: ScreenId) => {
+    onNavigate(screen);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-[#FFF4E6] dark:bg-[#171717] border-b-2 border-[#171717] dark:border-[#383838] transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         
         {/* Zone 1: Brand Wordmark & Coding Symbol */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
-            onClick={() => onNavigate('landing')}
-            className="flex items-center gap-2.5 group text-left focus:outline-none"
+            onClick={() => handleMobileNav('landing')}
+            className="flex items-center gap-2 sm:gap-2.5 group text-left focus:outline-none"
           >
-            <div className="w-10 h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center group-hover:scale-105 transition-transform shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center group-hover:scale-105 transition-transform shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838] shrink-0">
               <img
                 src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
                 alt="DsaHack Logo"
@@ -60,18 +67,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-tight text-[#171717] dark:text-[#FFFFFF] leading-none">
+              <span className="text-lg sm:text-xl font-extrabold tracking-tight text-[#171717] dark:text-[#FFFFFF] leading-none">
                 Dsa<span className="text-[#F4A6C1]">Hack</span>
               </span>
-              <span className="text-[10px] font-semibold text-[#171717]/70 dark:text-[#FFFFFF]/70 tracking-wider uppercase mt-0.5">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-[#171717]/70 dark:text-[#FFFFFF]/70 tracking-wider uppercase mt-0.5">
                 Code · Compete · Conquer
               </span>
             </div>
           </button>
         </div>
 
-        {/* Zone 2: Navigation Links (single line, clean typography) */}
-        <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-[#171717] dark:text-[#FFFFFF]/90">
+        {/* Zone 2: Navigation Links for Desktop */}
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm font-semibold text-[#171717] dark:text-[#FFFFFF]/90">
           {navLinks.map((link) => {
             const isActive = currentScreen === link.screen;
             return (
@@ -90,14 +97,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </nav>
 
-        {/* Zone 3: Actions - Theme Switcher & Simple Sign Up / Sign In */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Zone 3: Actions - Theme Switcher & Auth State */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           
           {/* Theme Switcher */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle light and dark theme"
-            className="w-9 h-9 rounded-lg bg-white dark:bg-[#212121] neo-border-sm flex items-center justify-center text-[#171717] dark:text-[#FFF4E6] hover:bg-gray-100 dark:hover:bg-[#2c2c2c] transition-all shadow-[1.5px_1.5px_0px_0px_#171717] dark:shadow-[1.5px_1.5px_0px_0px_#383838]"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white dark:bg-[#212121] neo-border-sm flex items-center justify-center text-[#171717] dark:text-[#FFF4E6] hover:bg-gray-100 dark:hover:bg-[#2c2c2c] transition-all shadow-[1.5px_1.5px_0px_0px_#171717] dark:shadow-[1.5px_1.5px_0px_0px_#383838]"
             title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Theme`}
           >
             {theme === 'light' ? (
@@ -107,37 +114,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
-          {/* Simple Auth State: Sign In & Sign Up buttons or user controls when logged in */}
+          {/* User Controls or Login/Signup */}
           {user ? (
-            <div className="flex items-center gap-2">
-              {user.role === 'admin' && (
-                <button
-                  onClick={() => onNavigate('admin_dashboard')}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-extrabold neo-border-sm transition-all shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838] ${
-                    currentScreen === 'admin_dashboard'
-                      ? 'bg-[#F4A6C1] text-[#171717]'
-                      : 'bg-[#171717] text-[#F4A6C1] dark:bg-[#2c2c2c] dark:text-[#F4A6C1]'
-                  }`}
-                  title="Open Internal Admin Console"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Admin</span>
-                </button>
-              )}
-
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm neo-btn text-xs font-bold shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm neo-btn text-xs font-bold shadow-[1.5px_1.5px_0px_0px_#171717]"
+                title="Your Streak & XP"
               >
-                <Flame className="w-3.5 h-3.5 text-orange-600 fill-orange-500" />
-                <span className="tabular-nums">{user.streak}d</span>
+                <Flame className="w-3.5 h-3.5 text-orange-600 fill-orange-500 shrink-0" />
+                <span className="tabular-nums font-mono">{user.streak}d</span>
                 <span className="hidden sm:inline">·</span>
                 <span className="hidden sm:inline font-mono">{user.xp} XP</span>
               </button>
 
               <button
                 onClick={() => onNavigate('profile')}
-                className="w-9 h-9 rounded-lg neo-border-sm overflow-hidden bg-[#F4A6C1] flex items-center justify-center text-xs font-bold hover:opacity-90 transition-opacity shadow-[1.5px_1.5px_0px_0px_#171717] dark:shadow-[1.5px_1.5px_0px_0px_#383838]"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg neo-border-sm overflow-hidden bg-[#F4A6C1] flex items-center justify-center text-xs font-bold hover:opacity-90 transition-opacity shadow-[1.5px_1.5px_0px_0px_#171717] shrink-0"
                 title="View Profile"
               >
                 {user.avatar && user.avatar.startsWith('http') ? (
@@ -154,25 +147,25 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 onClick={onLogout}
-                className="p-2 rounded-lg text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                className="hidden sm:flex p-1.5 sm:p-2 rounded-lg text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                 title="Log Out"
               >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => onNavigate('login')}
-                className="px-3 py-1.5 text-xs font-bold text-[#171717] dark:text-white hover:underline flex items-center gap-1"
+                className="px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#171717] dark:text-white hover:underline flex items-center gap-1"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Log In</span>
+                <span className="hidden xs:inline">Log In</span>
               </button>
               
               <button
                 onClick={() => onNavigate('signup')}
-                className="px-4 py-1.5 rounded-lg bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-extrabold flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]"
+                className="px-3 sm:px-4 py-1.5 rounded-lg bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-extrabold flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>Sign Up</span>
@@ -180,76 +173,113 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Mobile menu trigger */}
+          {/* Mobile hamburger menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-1.5 rounded-md neo-border-sm bg-white dark:bg-[#212121] text-[#171717] dark:text-white"
+            className="lg:hidden p-1.5 sm:p-2 rounded-lg neo-border-sm bg-white dark:bg-[#212121] text-[#171717] dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors focus:outline-none"
             aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Responsive Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#FFF4E6] dark:bg-[#171717] border-b-2 border-[#171717] dark:border-[#383838] px-4 pt-2 pb-4 space-y-2 text-sm font-bold">
-          {navLinks.map((link) => (
-            <button
-              key={link.screen}
-              onClick={() => {
-                onNavigate(link.screen);
-                setMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 px-3 rounded-lg hover:bg-[#F4A6C1]/20 dark:hover:bg-white/10 text-[#171717] dark:text-white"
-            >
-              {link.label}
-            </button>
-          ))}
-          <div className="pt-2 border-t border-gray-300 dark:border-gray-800 flex flex-wrap gap-2">
-            {!user ? (
-              <>
+        <div className="lg:hidden bg-[#FFF4E6] dark:bg-[#1a1a1a] border-b-2 border-[#171717] dark:border-[#383838] px-4 py-4 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          
+          {/* User mini-card if logged in */}
+          {user && (
+            <div className="p-3 rounded-xl bg-white dark:bg-[#242424] neo-border-sm flex items-center justify-between gap-3 shadow-[2px_2px_0px_0px_#171717]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-lg neo-border-sm overflow-hidden bg-[#F4A6C1] flex items-center justify-center font-bold text-sm shrink-0">
+                  {user.avatar && user.avatar.startsWith('http') ? (
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.name.slice(0, 2).toUpperCase()}</span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-extrabold text-[#171717] dark:text-white leading-tight">
+                    {user.name}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    @{user.username}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-mono font-bold bg-[#D8EEDC] text-emerald-950 px-2 py-1 rounded-md neo-border-sm">
+                <Flame className="w-3.5 h-3.5 text-orange-600 fill-orange-500" />
+                <span>{user.streak}d</span>
+                <span>·</span>
+                <span>{user.xp} XP</span>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Learning Links Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+            {navLinks.map((link) => {
+              const isActive = currentScreen === link.screen;
+              return (
                 <button
-                  onClick={() => {
-                    onNavigate('login');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex-1 py-2 text-center rounded-lg bg-white dark:bg-[#262626] text-[#171717] dark:text-white neo-border-sm text-xs font-bold"
+                  key={link.screen}
+                  onClick={() => handleMobileNav(link.screen)}
+                  className={`py-2.5 px-3 rounded-xl text-left transition-all neo-border-sm flex items-center justify-between ${
+                    isActive
+                      ? 'bg-[#F4A6C1] text-[#171717] font-extrabold shadow-[1.5px_1.5px_0px_0px_#171717]'
+                      : 'bg-white dark:bg-[#262626] text-[#171717] dark:text-white hover:bg-[#FFF0B3]'
+                  }`}
+                >
+                  <span>{link.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Account and Auth Controls */}
+          <div className="pt-3 border-t border-gray-300 dark:border-gray-800 space-y-2">
+            {!user ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleMobileNav('login')}
+                  className="flex-1 py-2.5 text-center rounded-xl bg-white dark:bg-[#262626] text-[#171717] dark:text-white neo-border-sm text-xs font-bold"
                 >
                   Log In
                 </button>
                 <button
-                  onClick={() => {
-                    onNavigate('signup');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex-1 py-2 text-center rounded-lg bg-[#F4A6C1] text-[#171717] neo-border-sm text-xs font-extrabold"
+                  onClick={() => handleMobileNav('signup')}
+                  className="flex-1 py-2.5 text-center rounded-xl bg-[#F4A6C1] text-[#171717] neo-border-sm text-xs font-extrabold shadow-[2px_2px_0px_0px_#171717]"
                 >
-                  Sign Up
+                  Create Free Account
                 </button>
-              </>
+              </div>
             ) : (
-              <div className="w-full space-y-2">
-                {user.role === 'admin' && (
-                  <button
-                    onClick={() => {
-                      onNavigate('admin_dashboard');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full py-2 text-center rounded-lg bg-[#171717] text-[#F4A6C1] dark:bg-[#F4A6C1] dark:text-[#171717] neo-border-sm text-xs font-extrabold flex items-center justify-center gap-1.5"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Open Admin Console</span>
-                  </button>
-                )}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleMobileNav('dashboard')}
+                  className="py-2 rounded-xl bg-[#D8EEDC] text-[#171717] neo-border-sm text-xs font-bold text-center flex items-center justify-center gap-1"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </button>
+                <button
+                  onClick={() => handleMobileNav('profile')}
+                  className="py-2 rounded-xl bg-[#FFF0B3] text-[#171717] neo-border-sm text-xs font-bold text-center flex items-center justify-center gap-1"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Profile</span>
+                </button>
                 <button
                   onClick={() => {
-                    onNavigate('dashboard');
+                    onLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full py-2 text-center rounded-lg bg-[#D8EEDC] text-[#171717] neo-border-sm text-xs font-bold"
+                  className="py-2 rounded-xl bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-200 neo-border-sm text-xs font-bold text-center flex items-center justify-center gap-1"
                 >
-                  Go to Dashboard
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
                 </button>
               </div>
             )}

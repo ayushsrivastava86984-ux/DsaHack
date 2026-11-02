@@ -43,7 +43,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-8">
+    <div className="py-6 sm:py-12 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Editorial Header */}
       <div className="space-y-2 border-b-2 border-[#171717] dark:border-[#383838] pb-6">
