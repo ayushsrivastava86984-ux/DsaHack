@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScreenId, Language, TopicName, Problem, UserProfile } from './types';
-import { INITIAL_PROBLEMS } from './data/mockData';
+import { fetchPublishedProblems } from './services/problemsService';
 import { ShieldCheck } from 'lucide-react';
 
 // Views
@@ -29,59 +29,64 @@ import { INITIAL_USER } from './data/mockData';
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('landing');
 
-  // Dynamic problem repository: initialized with INITIAL_PROBLEMS + persisted changes in localStorage
-  const [problems, setProblems] = useState<Problem[]>(() => {
+  // Supabase problems repository: fetched from public.problems where is_published = true
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [isLoadingProblems, setIsLoadingProblems] = useState<boolean>(true);
+  const [problemsError, setProblemsError] = useState<string | null>(null);
+
+  const loadPublishedProblems = useCallback(async () => {
+    setIsLoadingProblems(true);
+    setProblemsError(null);
     try {
-      const saved = localStorage.getItem('dsahack_custom_questions');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+      const { problems: fetched, error } = await fetchPublishedProblems();
+      if (error) {
+        setProblemsError(error.message);
+      } else {
+        setProblems(fetched);
+        if (fetched.length > 0) {
+          setSelectedProblem((prev) => {
+            if (!prev) return fetched[0];
+            const found = fetched.find(
+              (p) => p.id === prev.id || p.problemId === prev.problemId || p.slug === prev.slug
+            );
+            return found || fetched[0];
+          });
         }
       }
-    } catch (e) {
-      console.warn('Could not load custom questions from storage', e);
+    } catch (err) {
+      setProblemsError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoadingProblems(false);
     }
-    return INITIAL_PROBLEMS;
-  });
+  }, []);
 
-  const saveProblems = (updated: Problem[]) => {
-    setProblems(updated);
-    try {
-      localStorage.setItem('dsahack_custom_questions', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Could not save questions to localStorage', e);
-    }
-  };
+  useEffect(() => {
+    loadPublishedProblems();
+  }, [loadPublishedProblems]);
 
   const handleAddProblem = (newProb: Problem) => {
-    const updated = [newProb, ...problems];
-    saveProblems(updated);
+    setProblems((prev) => [newProb, ...prev]);
   };
 
   const handleUpdateProblem = (updatedProb: Problem) => {
-    const updated = problems.map((p) => (p.id === updatedProb.id ? updatedProb : p));
-    saveProblems(updated);
-    if (selectedProblem.id === updatedProb.id) {
-      setSelectedProblem(updatedProb);
-    }
+    setProblems((prev) => prev.map((p) => (p.id === updatedProb.id ? updatedProb : p)));
+    setSelectedProblem((prev) => (prev.id === updatedProb.id ? updatedProb : prev));
   };
 
   const handleDeleteProblem = (id: string) => {
-    const updated = problems.filter((p) => p.id !== id);
-    saveProblems(updated);
+    setProblems((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleTogglePublishProblem = (id: string) => {
-    const updated = problems.map((p) =>
-      p.id === id ? { ...p, isPublished: p.isPublished === false ? true : false } : p
+    setProblems((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, isPublished: p.isPublished === false ? true : false } : p
+      )
     );
-    saveProblems(updated);
   };
 
   const handleBulkImportProblems = (newBatch: Problem[]) => {
-    const updated = [...newBatch, ...problems];
-    saveProblems(updated);
+    setProblems((prev) => [...newBatch, ...prev]);
   };
 
   // User profile state - restored from localStorage if available, starts null for first-time visitors
@@ -127,9 +132,49 @@ export default function App() {
 
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('python');
   const [selectedTopic, setSelectedTopic] = useState<TopicName | 'All'>('All');
-  const [selectedProblem, setSelectedProblem] = useState<Problem>(INITIAL_PROBLEMS[0]);
-  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(['prob-4', 'prob-7']);
-  const [solvedIds, setSolvedIds] = useState<string[]>(['prob-1', 'prob-2', 'prob-3']);
+  const [selectedProblem, setSelectedProblem] = useState<Problem>(() => ({
+    id: 'fc7b2713-445e-4afb-8664-2d74db0624d9',
+    problemId: 'TWO_SUM',
+    number: 1,
+    title: 'Two Sum',
+    slug: 'two-sum',
+    difficulty: 'Easy',
+    topic: 'Arrays',
+    languageTags: ['python', 'java', 'cpp', 'c', 'javascript'],
+    acceptance: '53.8%',
+    description:
+      'Given an array of integers nums and an integer target, return the indices of the two numbers whose sum is equal to the target. You may assume that exactly one valid answer exists. You cannot use the same element twice.',
+    examples: [
+      {
+        input: 'nums = [2,7,11,15], target = 9',
+        output: '[0,1]',
+        explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].',
+      },
+    ],
+    constraints: [
+      '2 <= nums.length <= 10000',
+      '-1000000000 <= nums[i] <= 1000000000',
+      '-1000000000 <= target <= 1000000000',
+    ],
+    hints: ['A brute force approach searches all pairs. Can you use a hash map for O(n)?'],
+    starterCode: {
+      python: '# Two Sum\nclass Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Write your code here\n        pass\n',
+      java: '// Two Sum\nimport java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n        return new int[]{};\n    }\n}',
+      cpp: '// Two Sum\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};',
+      c: '// Two Sum\n#include <stdio.h>\n#include <stdlib.h>\n\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    *returnSize = 0;\n    return NULL;\n}',
+      javascript: '/**\n * Two Sum\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    // Write your code here\n};',
+    },
+    testCases: [
+      {
+        input: 'nums = [2,7,11,15], target = 9',
+        expectedOutput: '[0,1]',
+      },
+    ],
+    companyTags: ['Google', 'Meta', 'Amazon'],
+    isPublished: true,
+  }));
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [solvedIds, setSolvedIds] = useState<string[]>([]);
   const [isDailySolved, setIsDailySolved] = useState<boolean>(false);
 
   // Track pending destination and notice when an unauthenticated visitor attempts to access learning/coding
@@ -147,8 +192,6 @@ export default function App() {
     code?: string;
     lang?: Language;
   }>({
-    problem: INITIAL_PROBLEMS[0],
-    code: INITIAL_PROBLEMS[0].starterCode.python,
     lang: 'python',
   });
 
@@ -251,8 +294,23 @@ export default function App() {
     setCurrentScreen('dsa_questions');
   };
 
-  // Problem selection with auth guard
-  const handleSelectProblem = (problem: Problem) => {
+  // Problem selection with auth guard - supports object, DB uuid (id), or problem_id
+  const handleSelectProblem = (problemOrId: Problem | string) => {
+    let problem: Problem | undefined;
+    if (typeof problemOrId === 'string') {
+      problem =
+        problems.find(
+          (p) => p.id === problemOrId || p.problemId === problemOrId || p.slug === problemOrId
+        ) ||
+        (selectedProblem.id === problemOrId || selectedProblem.problemId === problemOrId
+          ? selectedProblem
+          : undefined);
+    } else {
+      problem = problemOrId;
+    }
+
+    if (!problem) return;
+
     setSelectedProblem(problem);
 
     if (!user) {
@@ -333,7 +391,7 @@ export default function App() {
 
   const handleSolveDaily = () => {
     setIsDailySolved(true);
-    handleProblemSolved(INITIAL_PROBLEMS[0].id);
+    handleProblemSolved(problems[0]?.id || selectedProblem.id);
     if (user) {
       const updated = {
         ...user,
@@ -456,6 +514,9 @@ export default function App() {
               solvedIds={solvedIds}
               onToggleBookmark={handleToggleBookmark}
               problems={problems}
+              isLoading={isLoadingProblems}
+              error={problemsError}
+              onRetry={loadPublishedProblems}
             />
           )}
 

@@ -8,10 +8,13 @@ import {
   Play, 
   Filter, 
   Sparkles, 
-  ArrowLeft,
-  Tag,
-  Building2,
-  ChevronDown
+  ArrowLeft, 
+  Tag, 
+  Building2, 
+  ChevronDown,
+  Loader2,
+  AlertTriangle,
+  RotateCcw
 } from 'lucide-react';
 
 interface DsaQuestionListingPageProps {
@@ -23,6 +26,9 @@ interface DsaQuestionListingPageProps {
   solvedIds: string[];
   onToggleBookmark: (id: string) => void;
   problems?: Problem[];
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
 export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
@@ -33,7 +39,10 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
   bookmarkedIds,
   solvedIds,
   onToggleBookmark,
-  problems = INITIAL_PROBLEMS,
+  problems = [],
+  isLoading = false,
+  error = null,
+  onRetry,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | Difficulty>('All');
@@ -210,110 +219,178 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
       </div>
 
-      {/* QUESTION TABLE */}
-      <div className="rounded-2xl bg-white dark:bg-[#212121] neo-border neo-shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b-2 border-[#171717] dark:border-[#383838] bg-[#FFF4E6] dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 font-extrabold uppercase tracking-wider">
-              <tr>
-                <th className="py-3.5 px-4 w-12 text-center">Status</th>
-                <th className="py-3.5 px-4">Problem Name</th>
-                <th className="py-3.5 px-4">Topic</th>
-                <th className="py-3.5 px-4">Difficulty</th>
-                <th className="py-3.5 px-4">Acceptance</th>
-                <th className="py-3.5 px-4">Companies</th>
-                <th className="py-3.5 px-4 text-center">Bookmark</th>
-                <th className="py-3.5 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredProblems.map((p) => {
-                const isSolved = solvedIds.includes(p.id);
-                const isBookmarked = bookmarkedIds.includes(p.id);
-
-                return (
-                  <tr 
-                    key={p.id}
-                    className="hover:bg-gray-50 dark:hover:bg-[#282828] transition-colors"
-                  >
-                    <td className="py-3.5 px-4 text-center">
-                      {isSolved ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" />
-                      ) : (
-                        <span className="w-2.5 h-2.5 rounded-full border border-gray-400 inline-block"></span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-bold text-[#171717] dark:text-white">
-                      <div className="flex items-center gap-2">
-                        <span>{p.number}. {p.title}</span>
-                        {p.isDaily && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-[#FFF0B3] text-[#171717]">
-                            Daily
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-md bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm text-[11px] font-bold text-[#171717] dark:text-white">
-                        {p.topic}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-bold">
-                      <span className={
-                        p.difficulty === 'Easy'
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : p.difficulty === 'Medium'
-                          ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }>
-                        {p.difficulty}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-gray-600 dark:text-gray-400 tabular-nums">
-                      {p.acceptance}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {p.companyTags.slice(0, 3).map((comp) => (
-                          <span key={comp} className="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
-                            {comp}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => onToggleBookmark(p.id)}
-                        className="text-gray-400 hover:text-amber-500 transition-colors p-1"
-                      >
-                        <Bookmark className={`w-4 h-4 ${isBookmarked ? 'text-amber-500 fill-amber-500' : ''}`} />
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => {
-                          onSelectProblem(p);
-                          onNavigate('problem_detail');
-                        }}
-                        className="px-3.5 py-1.5 rounded-lg bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-extrabold inline-flex items-center gap-1.5 shadow-[1.5px_1.5px_0px_0px_#171717]"
-                      >
-                        <Play className="w-3 h-3 fill-current" />
-                        <span>Solve</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* ERROR ALERT */}
+      {error && (
+        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 neo-border border-rose-600 text-rose-900 dark:text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 neo-shadow">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+            <div>
+              <p className="text-xs font-bold">Failed to load problems from Supabase database</p>
+              <p className="text-[11px] opacity-80 mt-0.5">{error}</p>
+            </div>
+          </div>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#171717] neo-border-sm text-xs font-bold text-[#171717] dark:text-white flex items-center gap-1.5 hover:bg-gray-50 shrink-0"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+          )}
         </div>
+      )}
+
+      {/* QUESTION TABLE / LOADING / EMPTY STATE */}
+      <div className="rounded-2xl bg-white dark:bg-[#212121] neo-border neo-shadow overflow-hidden">
+        {isLoading ? (
+          <div className="py-20 px-4 text-center space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#171717] dark:text-white" />
+            <p className="text-sm font-bold text-[#171717] dark:text-white">
+              Fetching published questions from Supabase...
+            </p>
+            <p className="text-xs text-gray-500">
+              Querying <span className="font-mono">public.problems</span> where <span className="font-mono">is_published = true</span>
+            </p>
+          </div>
+        ) : filteredProblems.length === 0 ? (
+          <div className="py-16 px-4 text-center space-y-2">
+            <p className="text-base font-extrabold text-[#171717] dark:text-white">
+              No questions found
+            </p>
+            <p className="text-xs text-gray-500 max-w-sm mx-auto">
+              {searchQuery || difficultyFilter !== 'All' || selectedCompany !== 'All' || selectedTopic !== 'All' || statusFilter !== 'all'
+                ? 'No problems match your current search and filter criteria. Try resetting filters.'
+                : 'There are currently no published questions in the database. Published questions will appear here automatically.'}
+            </p>
+            {(searchQuery || difficultyFilter !== 'All' || selectedCompany !== 'All' || selectedTopic !== 'All' || statusFilter !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setDifficultyFilter('All');
+                  setSelectedCompany('All');
+                  onSelectTopic('All');
+                  setStatusFilter('all');
+                }}
+                className="mt-3 px-3 py-1.5 rounded-xl bg-[#FFF0B3] text-[#171717] text-xs font-bold neo-border-sm"
+              >
+                Reset All Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b-2 border-[#171717] dark:border-[#383838] bg-[#FFF4E6] dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 font-extrabold uppercase tracking-wider">
+                <tr>
+                  <th className="py-3.5 px-4 w-12 text-center">Status</th>
+                  <th className="py-3.5 px-4">Problem Name</th>
+                  <th className="py-3.5 px-4">Topic</th>
+                  <th className="py-3.5 px-4">Difficulty</th>
+                  <th className="py-3.5 px-4">Acceptance</th>
+                  <th className="py-3.5 px-4">Companies</th>
+                  <th className="py-3.5 px-4 text-center">Bookmark</th>
+                  <th className="py-3.5 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {filteredProblems.map((p) => {
+                  const isSolved = solvedIds.includes(p.id);
+                  const isBookmarked = bookmarkedIds.includes(p.id);
+
+                  return (
+                    <tr 
+                      key={p.id}
+                      className="hover:bg-gray-50 dark:hover:bg-[#282828] transition-colors"
+                    >
+                      <td className="py-3.5 px-4 text-center">
+                        {isSolved ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" />
+                        ) : (
+                          <span className="w-2.5 h-2.5 rounded-full border border-gray-400 inline-block"></span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 font-bold text-[#171717] dark:text-white">
+                        <button
+                          onClick={() => {
+                            onSelectProblem(p);
+                            onNavigate('problem_detail');
+                          }}
+                          className="flex items-center gap-2 text-left hover:text-[#e05688] transition-colors group"
+                        >
+                          <span className="group-hover:underline">
+                            {p.number}. {p.title}
+                          </span>
+                          {p.isDaily && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-[#FFF0B3] text-[#171717]">
+                              Daily
+                            </span>
+                          )}
+                        </button>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span className="px-2.5 py-1 rounded-md bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm text-[11px] font-bold text-[#171717] dark:text-white">
+                          {p.topic}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-bold">
+                        <span className={
+                          p.difficulty === 'Easy'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : p.difficulty === 'Medium'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        }>
+                          {p.difficulty}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-mono text-gray-600 dark:text-gray-400 tabular-nums">
+                        {p.acceptance}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {p.companyTags.slice(0, 3).map((comp) => (
+                            <span key={comp} className="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                              {comp}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        <button
+                          onClick={() => onToggleBookmark(p.id)}
+                          className="text-gray-400 hover:text-amber-500 transition-colors p-1"
+                          title={isBookmarked ? 'Remove bookmark' : 'Bookmark problem'}
+                        >
+                          <Bookmark className={`w-4 h-4 ${isBookmarked ? 'text-amber-500 fill-amber-500' : ''}`} />
+                        </button>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          onClick={() => {
+                            onSelectProblem(p);
+                            onNavigate('problem_detail');
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-extrabold inline-flex items-center gap-1.5 shadow-[1.5px_1.5px_0px_0px_#171717]"
+                        >
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Solve</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

@@ -35,6 +35,7 @@ export interface TestCase {
 
 export interface Problem {
   id: string;
+  problemId?: string;
   number: number;
   title: string;
   slug: string;
