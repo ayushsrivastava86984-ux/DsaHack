@@ -142,14 +142,17 @@ export const StudentProfilePage: React.FC<StudentProfilePageProps> = ({
 
       {/* ACTIVITY HEATMAP (GitHub-style 52 Weeks Grid) */}
       <div className="p-6 rounded-3xl bg-white dark:bg-[#212121] neo-border neo-shadow space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-[#F4A6C1]" />
             <h3 className="text-base font-extrabold text-[#171717] dark:text-white">
               Annual Coding Activity Heatmap
             </h3>
           </div>
-          <span className="text-xs font-mono text-gray-500">238 Solves in 2026</span>
+          <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
+            <span>238 Solves in 2026</span>
+            <span className="sm:hidden text-[10px] text-gray-400 font-sans">(Scroll →)</span>
+          </div>
         </div>
 
         <div className="overflow-x-auto pb-2">

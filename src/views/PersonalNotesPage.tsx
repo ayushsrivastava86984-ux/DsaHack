@@ -107,7 +107,7 @@ export const PersonalNotesPage: React.FC<PersonalNotesPageProps> = ({
       {/* TABS & SEARCH */}
       <div className="p-4 rounded-2xl bg-white dark:bg-[#212121] neo-border neo-shadow flex flex-col sm:flex-row items-center justify-between gap-4">
         
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] text-xs font-bold w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] text-xs font-bold w-full sm:w-auto overflow-x-auto max-w-full">
           {[
             { id: 'gotchas', label: '⚠️ Gotchas & Pitfalls' },
             { id: 'notes', label: '📝 Theory Notes' },

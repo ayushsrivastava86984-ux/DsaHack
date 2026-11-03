@@ -16,6 +16,17 @@
 html, body {
   max-width: 100%;
   overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -24,6 +35,7 @@ body {
   color: #171717;
   transition: background-color 0.2s ease, color 0.2s ease;
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dark body, html.dark body {

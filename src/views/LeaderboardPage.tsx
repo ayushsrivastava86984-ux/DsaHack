@@ -151,9 +151,76 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onNavigate }) 
 
       </div>
 
-      {/* FULL LEADERBOARD TABLE */}
+      {/* FULL LEADERBOARD - RESPONSIVE DUAL VIEW */}
       <div className="rounded-2xl bg-white dark:bg-[#212121] neo-border neo-shadow overflow-hidden">
-        <div className="overflow-x-auto">
+        
+        {/* MOBILE CARDS VIEW (< md) */}
+        <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+          {filteredList.map((user) => {
+            const isYou = user.name.includes('(You)');
+
+            return (
+              <div 
+                key={user.rank}
+                className={`p-3.5 space-y-2.5 transition-colors ${
+                  isYou ? 'bg-[#FFF0B3]/40 dark:bg-amber-950/20' : 'hover:bg-gray-50 dark:hover:bg-[#262626]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="shrink-0">
+                      {user.rank <= 3 ? (
+                        <span className={`w-7 h-7 rounded-full inline-flex items-center justify-center font-extrabold text-xs shadow-sm ${
+                          user.rank === 1 
+                            ? 'bg-amber-400 text-black' 
+                            : user.rank === 2 
+                            ? 'bg-gray-300 text-black' 
+                            : 'bg-amber-700 text-white'
+                        }`}>
+                          {user.rank}
+                        </span>
+                      ) : (
+                        <span className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 inline-flex items-center justify-center font-mono text-xs font-bold text-gray-500">
+                          #{user.rank}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-extrabold text-xs text-[#171717] dark:text-white truncate">
+                          {user.name}
+                        </p>
+                        {isYou && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#F4A6C1] text-[#171717]">
+                            You
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                        {user.college}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <span className="px-2.5 py-1 rounded-md bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm font-mono font-extrabold text-xs text-[#171717] dark:text-white inline-block">
+                      {user.rating} pts
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] font-mono text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-800">
+                  <span>{user.solved} Solved</span>
+                  <span className="font-bold text-amber-600">{user.xp.toLocaleString()} XP</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* DESKTOP TABLE VIEW (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b-2 border-[#171717] dark:border-[#383838] bg-[#FFF4E6] dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 font-extrabold uppercase tracking-wider">
               <tr>

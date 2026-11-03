@@ -61,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center group-hover:scale-105 transition-transform shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838] shrink-0">
               <img
-                src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                src="/logo.png"
                 alt="DsaHack Logo"
                 className="w-full h-full object-cover"
               />
@@ -70,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-lg sm:text-xl font-extrabold tracking-tight text-[#171717] dark:text-[#FFFFFF] leading-none">
                 Dsa<span className="text-[#F4A6C1]">Hack</span>
               </span>
-              <span className="text-[9px] sm:text-[10px] font-semibold text-[#171717]/70 dark:text-[#FFFFFF]/70 tracking-wider uppercase mt-0.5">
+              <span className="hidden sm:inline text-[9px] sm:text-[10px] font-semibold text-[#171717]/70 dark:text-[#FFFFFF]/70 tracking-wider uppercase mt-0.5">
                 Code · Compete · Conquer
               </span>
             </div>

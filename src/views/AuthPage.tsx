@@ -164,7 +164,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
                 <img
-                  src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                  src="/logo.png"
                   alt="DsaHack Logo"
                   className="w-full h-full object-cover"
                 />
@@ -183,8 +183,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             </p>
           </div>
 
-          {/* 3D Illustration */}
-          <div className="my-6 relative rounded-2xl neo-border overflow-hidden bg-white dark:bg-[#242424] aspect-4/3 shadow-[3px_3px_0px_0px_#171717] dark:shadow-[3px_3px_0px_0px_#383838]">
+          {/* 3D Illustration - hidden on mobile so user immediately sees login form */}
+          <div className="hidden sm:block my-6 relative rounded-2xl neo-border overflow-hidden bg-white dark:bg-[#242424] aspect-4/3 shadow-[3px_3px_0px_0px_#171717] dark:shadow-[3px_3px_0px_0px_#383838]">
             <img 
               src="/images/dsa_auth_illustration_1793517789177.jpg" 
               alt="DsaHack Coder Workspace"
@@ -194,7 +194,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           </div>
 
           {/* Motivational Bottom Quote */}
-          <div className="p-3.5 rounded-xl bg-[#D8EEDC] neo-border-sm text-[#171717] text-xs font-semibold relative z-10">
+          <div className="hidden sm:block p-3.5 rounded-xl bg-[#D8EEDC] neo-border-sm text-[#171717] text-xs font-semibold relative z-10">
             <p className="italic">
               "Consistency outperforms natural talent. Solve one problem today, build intuition forever."
             </p>

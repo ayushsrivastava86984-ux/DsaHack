@@ -68,7 +68,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Next-Gen Algorithm & Programming Playground</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#171717] dark:text-white leading-[1.08] text-balance">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#171717] dark:text-white leading-[1.08] text-balance">
               Think in Code. <br className="hidden sm:inline" />
               <span className="relative inline-block mt-1">
                 <span className="relative z-10">Grow Through</span>
@@ -76,15 +76,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </span> Practice.
             </h1>
 
-            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 max-w-2xl leading-relaxed">
+            <p className="text-base sm:text-xl text-gray-700 dark:text-gray-300 max-w-2xl leading-relaxed">
               Learn programming, master DSA and build the problem-solving skills to become interview-ready. Code in 5 languages, get progressive AI mentoring without spoilers, and track streaks.
             </p>
 
             {/* CTAs */}
-            <div className="pt-2 flex flex-wrap items-center gap-4">
+            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={() => onNavigate('signup')}
-                className="px-6 py-3.5 rounded-xl bg-[#F4A6C1] text-[#171717] neo-border font-extrabold text-base neo-btn neo-shadow flex items-center gap-2"
+                className="w-full xs:w-auto justify-center px-6 py-3.5 rounded-xl bg-[#F4A6C1] text-[#171717] neo-border font-extrabold text-sm sm:text-base neo-btn neo-shadow flex items-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Get Started (Sign Up Free)</span>
@@ -92,7 +92,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <button
                 onClick={() => onNavigate('dsa_questions')}
-                className="px-6 py-3.5 rounded-xl bg-white dark:bg-[#262626] text-[#171717] dark:text-white neo-border font-bold text-base neo-btn neo-shadow hover:bg-gray-50 dark:hover:bg-[#303030] flex items-center gap-2"
+                className="w-full xs:w-auto justify-center px-6 py-3.5 rounded-xl bg-white dark:bg-[#262626] text-[#171717] dark:text-white neo-border font-bold text-sm sm:text-base neo-btn neo-shadow hover:bg-gray-50 dark:hover:bg-[#303030] flex items-center gap-2"
               >
                 <Play className="w-4 h-4 text-[#171717] dark:text-[#F4A6C1] fill-current" />
                 <span>Solve Questions</span>
@@ -492,14 +492,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Tab 1: Live Code Editor Preview */}
           {activePreviewTab === 'editor' && (
             <div className="rounded-2xl neo-border neo-shadow-lg overflow-hidden bg-[#171717] text-white max-w-4xl mx-auto">
-              <div className="bg-[#212121] px-4 py-3 border-b border-[#333333] flex items-center justify-between text-xs">
+              <div className="bg-[#212121] px-3 sm:px-4 py-3 border-b border-[#333333] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-[#F4A6C1]">Problem #1: Two Sum</span>
                   <span className="text-gray-400">·</span>
                   <span className="text-emerald-400">Easy</span>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <select
                     value={demoLang}
                     onChange={(e) => setDemoLang(e.target.value as Language)}
@@ -550,7 +550,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[1, 2, 3].map((step) => (
                   <button
                     key={step}

@@ -54,11 +54,11 @@ export const ContestsPage: React.FC<ContestsPageProps> = ({ onNavigate }) => {
             Participate in weekly algorithmic clashes, climb the global ranking ladder, and solve 4-5 problems under strict competitive time limits.
           </p>
 
-          <div className="flex items-center gap-4 text-xs font-bold text-gray-700 dark:text-gray-300 pt-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-bold text-gray-700 dark:text-gray-300 pt-2">
             <span>● Official Rating System</span>
-            <span>·</span>
+            <span className="hidden xs:inline">·</span>
             <span>● Real-time Penalty Clocks</span>
-            <span>·</span>
+            <span className="hidden xs:inline">·</span>
             <span>● College Team Standings</span>
           </div>
         </div>

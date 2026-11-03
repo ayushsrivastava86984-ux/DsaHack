@@ -379,7 +379,7 @@ export default function App() {
         />
 
         {/* Dynamic Main Body Content */}
-        <main className="flex-1">
+        <main className="flex-1 w-full min-w-0 max-w-full overflow-x-hidden">
           {currentScreen === 'landing' && (
             <LandingPage
               onNavigate={handleNavigate}

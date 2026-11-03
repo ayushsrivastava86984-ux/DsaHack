@@ -16,7 +16,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl neo-border overflow-hidden bg-black flex items-center justify-center shadow-[2px_2px_0px_0px_#171717] dark:shadow-[2px_2px_0px_0px_#383838]">
               <img
-                src="/assets/aistudio/Neon_DsaHack_Coding_Emblem_586b4f4c.png"
+                src="/logo.png"
                 alt="DsaHack Logo"
                 className="w-full h-full object-cover"
               />
