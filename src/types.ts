@@ -40,7 +40,8 @@ export interface Problem {
   title: string;
   slug: string;
   difficulty: Difficulty;
-  topic: TopicName;
+  topic: TopicName | string;
+  topics?: string[];
   languageTags: Language[];
   acceptance: string;
   description: string;

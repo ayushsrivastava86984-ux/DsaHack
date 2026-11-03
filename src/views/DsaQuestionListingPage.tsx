@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { ScreenId, TopicName, Problem, Difficulty } from '../types';
+import React, { useState, useMemo } from 'react';
+import { ScreenId, Problem, Difficulty } from '../types';
 import { DSA_TOPICS } from '../data/mockData';
+import { matchesTopic } from '../services/problemsService';
 import { 
   Search, 
   Bookmark, 
@@ -17,8 +18,8 @@ import {
 } from 'lucide-react';
 
 interface DsaQuestionListingPageProps {
-  selectedTopic: TopicName | 'All';
-  onSelectTopic: (topic: TopicName | 'All') => void;
+  selectedTopic: string;
+  onSelectTopic: (topic: string) => void;
   onNavigate: (screen: ScreenId) => void;
   onSelectProblem: (problem: Problem) => void;
   bookmarkedIds: string[];
@@ -51,6 +52,22 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
   const companies = ['All', 'Google', 'Meta', 'Amazon', 'Microsoft', 'Apple', 'Netflix', 'Uber'];
 
+  // Dynamically compute unique topics from fetched database problems + standard syllabus topics
+  const dynamicTopics = useMemo(() => {
+    const list: string[] = ['All', 'Arrays', 'Strings', 'Linked List'];
+    const set = new Set<string>();
+    list.forEach((t) => set.add(t));
+
+    problems.forEach((p) => {
+      (p.topics && p.topics.length > 0 ? p.topics : [p.topic]).forEach((t) => {
+        if (t && t.trim()) set.add(t.trim());
+      });
+    });
+
+    DSA_TOPICS.forEach((t) => set.add(t.name));
+    return Array.from(set);
+  }, [problems]);
+
   const handleRefresh = async () => {
     if (onRetry) {
       setIsRefreshing(true);
@@ -63,9 +80,12 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
     // Only published problems visible to students
     if (p.isPublished === false) return false;
 
-    // Topic filter
-    if (selectedTopic !== 'All' && p.topic !== selectedTopic) {
-      return false;
+    // Topic filter - supports JSONB arrays and case/singular/plural variations
+    if (selectedTopic !== 'All' && selectedTopic !== 'All Problems') {
+      const problemTopics = p.topics && p.topics.length > 0 ? p.topics : [p.topic];
+      if (!matchesTopic(problemTopics, selectedTopic)) {
+        return false;
+      }
     }
 
     // Company tag filter
@@ -78,14 +98,16 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
       return false;
     }
 
-    // Search query: match title, topic, problemId, or company
+    // Search query: match title, problemId, topics, description, or company
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
+      const problemTopics = p.topics && p.topics.length > 0 ? p.topics : [p.topic];
       const match = 
         p.title.toLowerCase().includes(q) || 
-        p.topic.toLowerCase().includes(q) ||
         (p.problemId && p.problemId.toLowerCase().includes(q)) ||
-        p.companyTags.some(c => c.toLowerCase().includes(q));
+        problemTopics.some((t) => t.toLowerCase().includes(q)) ||
+        p.description.toLowerCase().includes(q) ||
+        p.companyTags.some((c) => c.toLowerCase().includes(q));
       if (!match) return false;
     }
 
@@ -116,10 +138,10 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-extrabold text-[#171717] dark:text-white">
-                {selectedTopic === 'All' ? 'All DSA Practice Problems' : `${selectedTopic} Track`}
+                {selectedTopic === 'All' || selectedTopic === 'All Problems' ? 'All Practice Problems' : `${selectedTopic} Track`}
               </h1>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D8EEDC] text-emerald-950 font-mono">
-                {filteredProblems.length} {filteredProblems.length === 1 ? 'Question' : 'Questions'}
+                {filteredProblems.length} of {problems.length} {problems.length === 1 ? 'Question' : 'Questions'}
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -142,13 +164,17 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
           <select
             value={selectedTopic}
-            onChange={(e) => onSelectTopic(e.target.value as any)}
+            onChange={(e) => onSelectTopic(e.target.value)}
             className="px-3 py-2 rounded-xl neo-border-sm bg-[#FFF4E6] dark:bg-[#1a1a1a] text-xs font-bold text-[#171717] dark:text-white focus:outline-none"
           >
-            <option value="All">All Topics</option>
-            {DSA_TOPICS.map((t) => (
-              <option key={t.name} value={t.name}>{t.name}</option>
-            ))}
+            <option value="All">All Problems</option>
+            {dynamicTopics
+              .filter((t) => t !== 'All' && t !== 'All Problems')
+              .map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -336,9 +362,11 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
                           }`}>
                             {p.difficulty}
                           </span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                            {p.topic}
-                          </span>
+                          {(p.topics && p.topics.length > 0 ? p.topics : [p.topic]).map((t, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                              {t}
+                            </span>
+                          ))}
                         </div>
 
                         <button
@@ -449,9 +477,13 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <span className="px-2.5 py-1 rounded-md bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm text-[11px] font-bold text-[#171717] dark:text-white">
-                            {p.topic}
-                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {(p.topics && p.topics.length > 0 ? p.topics : [p.topic]).map((t, idx) => (
+                              <span key={idx} className="px-2 py-0.5 rounded-md bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm text-[11px] font-bold text-[#171717] dark:text-white whitespace-nowrap">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         </td>
 
                         <td className="py-3.5 px-4 font-bold">

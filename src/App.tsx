@@ -456,6 +456,8 @@ export default function App() {
             <DsaTopicSelectionPage
               onNavigate={handleNavigate}
               onSelectTopic={handleSelectTopic}
+              problems={problems}
+              solvedIds={solvedIds}
             />
           )}
 

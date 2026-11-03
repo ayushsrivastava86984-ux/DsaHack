@@ -123,8 +123,13 @@ export const CodingWorkspace: React.FC<CodingWorkspaceProps> = ({
           </button>
 
           <div className="flex items-center gap-2 min-w-0">
+            {problem.problemId && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFF4E6] dark:bg-[#2a2a2a] neo-border-sm text-gray-700 dark:text-gray-300 shrink-0">
+                {problem.problemId}
+              </span>
+            )}
             <span className="text-xs sm:text-sm font-extrabold text-[#171717] dark:text-white truncate">
-              {problem.number}. {problem.title}
+              {problem.title}
             </span>
 
             <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold shrink-0 ${
@@ -263,6 +268,34 @@ export const CodingWorkspace: React.FC<CodingWorkspaceProps> = ({
             
             {activeTab === 'description' && (
               <>
+                {/* Problem Header Info */}
+                <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-800">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {problem.problemId && (
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-extrabold bg-[#FFF4E6] dark:bg-[#202020] neo-border-sm text-[#171717] dark:text-gray-200">
+                        {problem.problemId}
+                      </span>
+                    )}
+                    <span className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold ${
+                      problem.difficulty === 'Easy'
+                        ? 'bg-[#D8EEDC] text-emerald-900'
+                        : problem.difficulty === 'Medium'
+                        ? 'bg-[#FFF0B3] text-amber-900'
+                        : 'bg-[#F4A6C1] text-rose-950'
+                    }`}>
+                      {problem.difficulty}
+                    </span>
+                    {(problem.topics && problem.topics.length > 0 ? problem.topics : [problem.topic]).map((t, idx) => (
+                      <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <h2 className="text-base sm:text-lg font-black text-[#171717] dark:text-white">
+                    {problem.title}
+                  </h2>
+                </div>
+
                 {/* Problem Statement */}
                 <div className="space-y-4">
                   <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm">

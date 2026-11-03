@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ScreenId, TopicName } from '../types';
+import { ScreenId, Problem } from '../types';
 import { DSA_TOPICS } from '../data/mockData';
+import { matchesTopic } from '../services/problemsService';
 import { 
   Layers, 
   ArrowRight, 
@@ -18,15 +19,32 @@ import {
 
 interface DsaTopicSelectionPageProps {
   onNavigate: (screen: ScreenId) => void;
-  onSelectTopic: (topic: TopicName) => void;
+  onSelectTopic: (topic: string) => void;
+  problems?: Problem[];
+  solvedIds?: string[];
 }
 
 export const DsaTopicSelectionPage: React.FC<DsaTopicSelectionPageProps> = ({
   onNavigate,
   onSelectTopic,
+  problems = [],
+  solvedIds = [],
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'high_yield' | 'core'>('all');
+
+  const getTopicQuestionCount = (topicName: string, fallbackCount: number) => {
+    if (!problems || problems.length === 0) return fallbackCount;
+    const dbCount = problems.filter((p) => matchesTopic(p.topics || [p.topic], topicName)).length;
+    return dbCount > 0 ? dbCount : fallbackCount;
+  };
+
+  const getTopicSolvedCount = (topicName: string, fallbackSolved: number) => {
+    if (!problems || problems.length === 0) return fallbackSolved;
+    const matching = problems.filter((p) => matchesTopic(p.topics || [p.topic], topicName));
+    if (matching.length === 0) return fallbackSolved;
+    return matching.filter((p) => solvedIds.includes(p.id)).length;
+  };
 
   const filteredTopics = DSA_TOPICS.filter((t) => {
     if (searchQuery) {
@@ -103,7 +121,9 @@ export const DsaTopicSelectionPage: React.FC<DsaTopicSelectionPageProps> = ({
       {/* 18 Topic Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTopics.map((topic, idx) => {
-          const completionPct = Math.round((topic.solvedCount / topic.totalQuestions) * 100);
+          const totalQuestions = getTopicQuestionCount(topic.name, topic.totalQuestions);
+          const solvedCount = getTopicSolvedCount(topic.name, topic.solvedCount);
+          const completionPct = totalQuestions > 0 ? Math.round((solvedCount / totalQuestions) * 100) : 0;
           const bgAccents = ['#FFF4E6', '#D8EEDC', '#FFF0B3', '#F4A6C1', '#ffffff'];
           const cardBg = bgAccents[idx % bgAccents.length];
 
@@ -132,7 +152,7 @@ export const DsaTopicSelectionPage: React.FC<DsaTopicSelectionPageProps> = ({
                         {topic.name}
                       </h3>
                       <p className="text-[11px] font-mono text-gray-500">
-                        {topic.totalQuestions} Questions Available
+                        {totalQuestions} Questions Available
                       </p>
                     </div>
                   </div>
@@ -151,7 +171,7 @@ export const DsaTopicSelectionPage: React.FC<DsaTopicSelectionPageProps> = ({
                   <div className="flex justify-between text-xs font-bold">
                     <span className="text-gray-500">Solved</span>
                     <span className="text-[#171717] dark:text-white tabular-nums">
-                      {topic.solvedCount} / {topic.totalQuestions} ({completionPct}%)
+                      {solvedCount} / {totalQuestions} ({completionPct}%)
                     </span>
                   </div>
 
