@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Problem, Difficulty, TopicName, Language, ProblemExample, TestCase } from '../types';
+import { Problem, Difficulty, TopicName, Language, ContentType, ProblemExample, TestCase } from '../types';
 
 export interface SupabaseProblemRow {
   id: string;
@@ -8,6 +8,8 @@ export interface SupabaseProblemRow {
   description: string;
   difficulty: string;
   topic: unknown; // JSONB array e.g. ["Arrays", "Sorting"] or string
+  content_type?: string | null; // 'dsa' | 'language'
+  language?: string | null;     // 'java' | 'python' | 'javascript' | 'cpp' | 'c'
   constraints: unknown;
   examples: unknown;
   hints: unknown;
@@ -15,6 +17,104 @@ export interface SupabaseProblemRow {
   is_published: boolean;
   created_at?: string | null;
   updated_at?: string | null;
+}
+
+export const SUPPORTED_LANGUAGES: Language[] = ['java', 'python', 'javascript', 'cpp', 'c'];
+
+export const OFFICIAL_DSA_TOPICS = [
+  'Arrays',
+  'Strings',
+  'Linked List',
+  'Stack',
+  'Queue',
+  'Hashing',
+  'Binary Search',
+  'Sorting',
+  'Recursion',
+  'Backtracking',
+  'Trees',
+  'Binary Search Trees',
+  'Heaps',
+  'Graphs',
+  'Greedy',
+  'Dynamic Programming',
+  'Trie',
+  'Bit Manipulation',
+] as const;
+
+/**
+ * Normalizes language string to Language type
+ */
+export function resolveLanguage(val: unknown): Language | undefined {
+  if (!val) return undefined;
+  const s = String(val).toLowerCase().trim();
+  if (s === 'java') return 'java';
+  if (s === 'python' || s === 'py' || s === 'python3') return 'python';
+  if (s === 'javascript' || s === 'js' || s === 'typescript' || s === 'ts') return 'javascript';
+  if (s === 'c++' || s === 'cpp') return 'cpp';
+  if (s === 'c') return 'c';
+  return undefined;
+}
+
+/**
+ * Accurately detects whether a problem belongs to DSA Practice ('dsa')
+ * or Programming Languages ('language'), and identifies target language.
+ */
+export function detectContentTypeAndLanguage(
+  row: SupabaseProblemRow,
+  parsedTopics: string[]
+): {
+  contentType: ContentType;
+  language?: Language;
+} {
+  // 1. Direct content_type column if present in row
+  if (row.content_type) {
+    const rawType = String(row.content_type).toLowerCase().trim();
+    if (rawType === 'language' || rawType === 'programming_language' || rawType === 'lang') {
+      const resolved =
+        resolveLanguage(row.language) ||
+        parsedTopics.map(resolveLanguage).find((l): l is Language => Boolean(l)) ||
+        resolveLanguage(row.problem_id);
+      return {
+        contentType: 'language',
+        language: resolved || 'java',
+      };
+    }
+    if (rawType === 'dsa') {
+      return { contentType: 'dsa' };
+    }
+  }
+
+  // 2. Direct language column if present in row
+  const resolvedFromLangCol = resolveLanguage(row.language);
+  if (resolvedFromLangCol) {
+    return {
+      contentType: 'language',
+      language: resolvedFromLangCol,
+    };
+  }
+
+  // 3. Inspect parsed topics for programming language names
+  for (const t of parsedTopics) {
+    const lang = resolveLanguage(t);
+    if (lang) {
+      return {
+        contentType: 'language',
+        language: lang,
+      };
+    }
+  }
+
+  // 4. Inspect problem_id prefix (e.g. JAVA-001, PY-002, JS-003, CPP-004, C-005)
+  const pid = String(row.problem_id || '').toUpperCase().trim();
+  if (pid.startsWith('JAVA-')) return { contentType: 'language', language: 'java' };
+  if (pid.startsWith('PY-') || pid.startsWith('PYTHON-')) return { contentType: 'language', language: 'python' };
+  if (pid.startsWith('JS-') || pid.startsWith('JAVASCRIPT-')) return { contentType: 'language', language: 'javascript' };
+  if (pid.startsWith('CPP-') || pid.startsWith('CPLUSPLUS-') || pid.startsWith('CP-')) return { contentType: 'language', language: 'cpp' };
+  if (pid.startsWith('C-') && !pid.startsWith('CYC-')) return { contentType: 'language', language: 'c' };
+
+  // 5. Default is DSA Practice problem
+  return { contentType: 'dsa' };
 }
 
 /**
@@ -284,16 +384,27 @@ export function mapSupabaseProblemToModel(row: SupabaseProblemRow, fallbackIndex
     });
   }
 
+  const { contentType, language } = detectContentTypeAndLanguage(row, topics);
+
+  // If it's a language question, languageTags should be ONLY the target language!
+  // If it's a DSA problem, it can be coded in all 5 languages.
+  const languageTags: Language[] =
+    contentType === 'language' && language
+      ? [language]
+      : ['python', 'java', 'cpp', 'c', 'javascript'];
+
   return {
     id: row.id,
     problemId: String(row.problem_id || row.id),
+    contentType,
+    language,
     number,
     title,
     slug,
     difficulty,
     topic: primaryTopic,
     topics,
-    languageTags: ['python', 'java', 'cpp', 'c', 'javascript'],
+    languageTags,
     acceptance: '53.8%',
     description: row.description || 'No description provided.',
     examples,
@@ -304,6 +415,140 @@ export function mapSupabaseProblemToModel(row: SupabaseProblemRow, fallbackIndex
     companyTags: ['Google', 'Meta', 'Amazon'],
     isPublished: row.is_published !== false,
   };
+}
+
+export interface CreateProblemInput {
+  contentType: 'dsa' | 'language';
+  dsaTopic?: string;
+  language?: Language;
+  problemId: string;
+  title: string;
+  difficulty: Difficulty;
+  description: string;
+  constraints: string[];
+  examples: ProblemExample[];
+  hints: string[];
+  starterCode?: Partial<Record<Language, string>>;
+  isPublished?: boolean;
+}
+
+/**
+ * Inserts a new problem to Supabase with explicit category and metadata.
+ * Gracefully handles missing database columns, and provides copyable SQL/JSON if RLS restricts anon inserts.
+ */
+export async function insertProblemToSupabase(input: CreateProblemInput): Promise<{
+  success: boolean;
+  problem?: Problem;
+  error?: string;
+  sqlSnippet?: string;
+  jsonRow?: string;
+  rlsBlocked?: boolean;
+}> {
+  const isDsa = input.contentType === 'dsa';
+  const topicList = isDsa
+    ? [input.dsaTopic || 'Arrays']
+    : [input.language ? input.language.charAt(0).toUpperCase() + input.language.slice(1) : 'Java'];
+
+  const starterCode = {
+    ...generateDefaultStarterCode(input.title, input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')),
+    ...(input.starterCode || {}),
+  };
+
+  const payload: Record<string, unknown> = {
+    problem_id: input.problemId.trim(),
+    title: input.title.trim(),
+    description: input.description.trim(),
+    difficulty: input.difficulty,
+    topic: JSON.stringify(topicList),
+    constraints: JSON.stringify(input.constraints),
+    examples: input.examples,
+    hints: input.hints,
+    starter_code: starterCode,
+    is_published: input.isPublished !== false,
+  };
+
+  const jsonForTableEditor = JSON.stringify(
+    {
+      ...payload,
+      content_type: input.contentType,
+      language: isDsa ? null : input.language || 'java',
+    },
+    null,
+    2
+  );
+
+  const sqlInsert = `INSERT INTO public.problems (problem_id, title, description, difficulty, topic, content_type, language, constraints, examples, hints, starter_code, is_published)
+VALUES (
+  '${input.problemId.replace(/'/g, "''")}',
+  '${input.title.replace(/'/g, "''")}',
+  '${input.description.replace(/'/g, "''")}',
+  '${input.difficulty}',
+  '${JSON.stringify(topicList).replace(/'/g, "''")}',
+  '${input.contentType}',
+  ${isDsa ? 'NULL' : `'${input.language || 'java'}'`},
+  '${JSON.stringify(input.constraints).replace(/'/g, "''")}',
+  '${JSON.stringify(input.examples).replace(/'/g, "''")}'::jsonb,
+  '${JSON.stringify(input.hints).replace(/'/g, "''")}'::jsonb,
+  '${JSON.stringify(starterCode).replace(/'/g, "''")}'::jsonb,
+  ${input.isPublished !== false ? 'true' : 'false'}
+);`;
+
+  try {
+    // 1. Attempt insert with native content_type and language columns
+    let insertResult = await supabase
+      .from('problems')
+      .insert([{
+        ...payload,
+        content_type: input.contentType,
+        language: isDsa ? null : input.language || 'java',
+      }])
+      .select();
+
+    // 2. If column does not exist yet in schema cache, fallback to compatible payload
+    if (insertResult.error && (insertResult.error.code === 'PGRST204' || insertResult.error.message?.includes('column'))) {
+      console.warn('[problemsService] Native content_type/language columns not found in schema cache. Inserting compatible record...');
+      insertResult = await supabase
+        .from('problems')
+        .insert([payload])
+        .select();
+    }
+
+    if (insertResult.error) {
+      const isRls = insertResult.error.code === '42501' || insertResult.error.message?.includes('row-level security');
+      return {
+        success: false,
+        error: insertResult.error.message,
+        rlsBlocked: isRls,
+        sqlSnippet: sqlInsert,
+        jsonRow: jsonForTableEditor,
+      };
+    }
+
+    if (insertResult.data && insertResult.data.length > 0) {
+      const created = mapSupabaseProblemToModel(insertResult.data[0] as SupabaseProblemRow);
+      return {
+        success: true,
+        problem: created,
+        sqlSnippet: sqlInsert,
+        jsonRow: jsonForTableEditor,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No data returned after insert.',
+      sqlSnippet: sqlInsert,
+      jsonRow: jsonForTableEditor,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      success: false,
+      error: msg,
+      sqlSnippet: sqlInsert,
+      jsonRow: jsonForTableEditor,
+    };
+  }
 }
 
 /**

@@ -12,15 +12,34 @@ import {
   Cpu
 } from 'lucide-react';
 
+import { Problem } from '../types';
+import { resolveLanguage } from '../services/problemsService';
+
 interface LanguageSelectionPageProps {
   onNavigate: (screen: ScreenId) => void;
   onSelectLanguage: (langId: Language) => void;
+  problems?: Problem[];
+  solvedIds?: string[];
 }
 
 export const LanguageSelectionPage: React.FC<LanguageSelectionPageProps> = ({
   onNavigate,
   onSelectLanguage,
+  problems = [],
+  solvedIds = [],
 }) => {
+  const getLanguageQuestionCount = (langId: Language, defaultCount: number) => {
+    if (!problems || problems.length === 0) return defaultCount;
+    const dbCount = problems.filter(
+      (p) =>
+        p.contentType === 'language' &&
+        (p.language === langId ||
+          p.languageTags.includes(langId) ||
+          (p.topics && p.topics.some((t) => resolveLanguage(t) === langId)) ||
+          resolveLanguage(p.topic) === langId)
+    ).length;
+    return dbCount > 0 ? dbCount : defaultCount;
+  };
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       
@@ -44,7 +63,15 @@ export const LanguageSelectionPage: React.FC<LanguageSelectionPageProps> = ({
       {/* 5 Language Bento Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {PROGRAMMING_LANGUAGES.map((lang) => {
-          const completionPct = Math.round((lang.solvedCount / lang.totalQuestions) * 100);
+          const totalQuestions = getLanguageQuestionCount(lang.id, lang.totalQuestions);
+          const solvedForLang = problems.filter(
+            (p) =>
+              p.contentType === 'language' &&
+              (p.language === lang.id || p.languageTags.includes(lang.id)) &&
+              solvedIds.includes(p.id)
+          ).length;
+          const displaySolved = solvedForLang > 0 ? solvedForLang : Math.min(lang.solvedCount, totalQuestions);
+          const completionPct = totalQuestions > 0 ? Math.round((displaySolved / totalQuestions) * 100) : 0;
           
           return (
             <div
@@ -81,7 +108,7 @@ export const LanguageSelectionPage: React.FC<LanguageSelectionPageProps> = ({
                   <div className="flex justify-between text-xs font-bold">
                     <span className="text-gray-500">Progress</span>
                     <span className="text-[#171717] dark:text-white tabular-nums">
-                      {lang.solvedCount} / {lang.totalQuestions} ({completionPct}%)
+                      {displaySolved} / {totalQuestions} ({completionPct}%)
                     </span>
                   </div>
 

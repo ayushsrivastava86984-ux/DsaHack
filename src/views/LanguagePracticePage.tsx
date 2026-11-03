@@ -12,6 +12,19 @@ import {
   Sparkles,
   Layers,
   ChevronRight
+import { resolveLanguage } from '../services/problemsService';
+import { 
+  Search, 
+  Filter, 
+  ArrowLeft, 
+  Bookmark, 
+  CheckCircle2, 
+  Play, 
+  Code2, 
+  Sparkles,
+  Layers,
+  ChevronRight,
+  Plus
 } from 'lucide-react';
 
 interface LanguagePracticePageProps {
@@ -23,6 +36,7 @@ interface LanguagePracticePageProps {
   solvedIds: string[];
   onToggleBookmark: (id: string) => void;
   problems?: Problem[];
+  onOpenAddQuestion?: () => void;
 }
 
 export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
@@ -33,7 +47,8 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
   bookmarkedIds,
   solvedIds,
   onToggleBookmark,
-  problems = INITIAL_PROBLEMS,
+  problems = [],
+  onOpenAddQuestion,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | 'Easy' | 'Medium' | 'Hard'>('All');
@@ -46,14 +61,27 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
   const intermediateTopics = ['Arrays', 'Strings', 'Stacks', 'Recursion', 'Sorting', 'OOP'];
   const advancedTopics = ['Dynamic Programming', 'Graphs', 'Memory Management', 'Pointers', 'STL'];
 
-  // Filter problems based on language, search, difficulty, status
-  const filteredProblems = problems.filter((p) => {
+  // STRICT SEPARATION: Only include questions classified as 'language' for THIS specific language.
+  // NEVER include DSA Practice problems in the language practice section!
+  const languageProblems = problems.filter((p) => {
     // Only published problems visible to students
     if (p.isPublished === false) return false;
 
-    // Matches language
-    if (!p.languageTags.includes(language)) return false;
+    // Must be explicitly a language question
+    if (p.contentType !== 'language') return false;
 
+    // Must match the current language
+    const matchesCurrentLang =
+      p.language === language ||
+      p.languageTags.includes(language) ||
+      (p.topics && p.topics.some((t) => resolveLanguage(t) === language)) ||
+      resolveLanguage(p.topic) === language;
+
+    return matchesCurrentLang;
+  });
+
+  // Filter problems based on search, difficulty, status
+  const filteredProblems = languageProblems.filter((p) => {
     // Search query
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -111,21 +139,34 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
           </div>
         </div>
 
-        {/* Quick Language Tab Bar */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm overflow-x-auto">
-          {PROGRAMMING_LANGUAGES.map((l) => (
+        {/* Actions & Quick Language Tab Bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenAddQuestion && (
             <button
-              key={l.id}
-              onClick={() => onSelectLanguage(l.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                l.id === language
-                  ? 'bg-[#171717] text-white shadow-sm'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
+              onClick={onOpenAddQuestion}
+              className="px-3 py-2 rounded-xl neo-border-sm bg-[#F4A6C1] text-xs font-black text-[#171717] flex items-center gap-1.5 hover:bg-[#ee8fae] transition-colors shadow-[1.5px_1.5px_0px_0px_#171717]"
+              title={`Add a new ${currentLang.name} question`}
             >
-              {l.name}
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Question</span>
             </button>
-          ))}
+          )}
+
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm overflow-x-auto">
+            {PROGRAMMING_LANGUAGES.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => onSelectLanguage(l.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                  l.id === language
+                    ? 'bg-[#171717] text-white shadow-sm'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+              >
+                {l.name}
+              </button>
+            ))}
+          </div>
         </div>
 
       </div>
@@ -279,9 +320,38 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
           </span>
         </div>
 
-        {/* MOBILE CARD VIEW (screens < md) */}
-        <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
-          {filteredProblems.map((p) => {
+        {filteredProblems.length === 0 ? (
+          <div className="py-16 px-4 text-center space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FFF4E6] dark:bg-[#1a1a1a] neo-border-sm flex items-center justify-center shadow-[2px_2px_0px_0px_#171717]">
+              <Code2 className="w-7 h-7 text-[#171717] dark:text-[#F4A6C1]" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base sm:text-lg font-black text-[#171717] dark:text-white">
+                No {currentLang.name} Practice Questions Found
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                {searchQuery || difficultyFilter !== 'All' || statusFilter !== 'all'
+                  ? `No ${currentLang.name} questions match your search or filter settings.`
+                  : `DSA problems are strictly kept separate and not shown here. Add a new ${currentLang.name} practice question using the button below or directly via Supabase.`}
+              </p>
+            </div>
+            {onOpenAddQuestion && (
+              <div className="pt-2">
+                <button
+                  onClick={onOpenAddQuestion}
+                  className="px-4 py-2.5 rounded-xl bg-[#F4A6C1] text-[#171717] neo-border-sm neo-btn text-xs font-black inline-flex items-center gap-2 shadow-[2px_2px_0px_0px_#171717]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add {currentLang.name} Question</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* MOBILE CARD VIEW (screens < md) */}
+            <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+              {filteredProblems.map((p) => {
             const isSolved = solvedIds.includes(p.id);
             const isBookmarked = bookmarkedIds.includes(p.id);
 
@@ -446,8 +516,9 @@ export const LanguagePracticePage: React.FC<LanguagePracticePageProps> = ({
             </tbody>
           </table>
         </div>
-
-      </div>
+      </>
+    )}
+  </div>
 
     </div>
   );

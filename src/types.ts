@@ -1,3 +1,5 @@
+export type ContentType = 'dsa' | 'language';
+
 export type Language = 'java' | 'python' | 'javascript' | 'cpp' | 'c';
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -5,8 +7,11 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type TopicName =
   | 'Arrays'
   | 'Strings'
+  | 'Linked List'
   | 'Linked Lists'
+  | 'Stack'
   | 'Stacks'
+  | 'Queue'
   | 'Queues'
   | 'Hashing'
   | 'Binary Search'
@@ -17,8 +22,10 @@ export type TopicName =
   | 'Binary Search Trees'
   | 'Heaps'
   | 'Graphs'
+  | 'Greedy'
   | 'Greedy Algorithms'
   | 'Dynamic Programming'
+  | 'Trie'
   | 'Tries'
   | 'Bit Manipulation';
 
@@ -36,6 +43,8 @@ export interface TestCase {
 export interface Problem {
   id: string;
   problemId?: string;
+  contentType?: ContentType; // 'dsa' | 'language' (defaults to 'dsa')
+  language?: Language;      // for language-specific practice: 'java' | 'python' | 'javascript' | 'cpp' | 'c'
   number: number;
   title: string;
   slug: string;

@@ -23,9 +23,33 @@ import { AchievementsPage } from './views/AchievementsPage';
 import { PersonalNotesPage } from './views/PersonalNotesPage';
 import { SettingsPage } from './views/SettingsPage';
 import { INITIAL_USER } from './data/mockData';
+import { AdminAddQuestionModal } from './components/AdminAddQuestionModal';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('landing');
+
+  // Admin Question Insertion Modal State
+  const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
+  const [addQuestionCategory, setAddQuestionCategory] = useState<'dsa' | 'language'>('dsa');
+  const [addQuestionLanguage, setAddQuestionLanguage] = useState<Language>('java');
+  const [addQuestionDsaTopic, setAddQuestionDsaTopic] = useState<string>('Arrays');
+
+  const handleOpenAddQuestion = (category: 'dsa' | 'language', lang?: Language, topic?: string) => {
+    setAddQuestionCategory(category);
+    if (lang) setAddQuestionLanguage(lang);
+    if (topic) setAddQuestionDsaTopic(topic);
+    setIsAddQuestionOpen(true);
+  };
+
+  const handleProblemAdded = (newProblem: Problem) => {
+    setProblems((prev) => {
+      const exists = prev.some((p) => p.id === newProblem.id || p.problemId === newProblem.problemId);
+      if (exists) {
+        return prev.map((p) => (p.id === newProblem.id || p.problemId === newProblem.problemId ? newProblem : p));
+      }
+      return [newProblem, ...prev];
+    });
+  };
 
   // Supabase problems repository: fetched from public.problems where is_published = true
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -77,6 +101,7 @@ export default function App() {
   const [selectedProblem, setSelectedProblem] = useState<Problem>(() => ({
     id: 'fc7b2713-445e-4afb-8664-2d74db0624d9',
     problemId: 'TWO_SUM',
+    contentType: 'dsa',
     number: 1,
     title: 'Two Sum',
     slug: 'two-sum',
@@ -436,6 +461,8 @@ export default function App() {
             <LanguageSelectionPage
               onNavigate={handleNavigate}
               onSelectLanguage={handleSelectLanguage}
+              problems={problems}
+              solvedIds={solvedIds}
             />
           )}
 
@@ -449,6 +476,7 @@ export default function App() {
               solvedIds={solvedIds}
               onToggleBookmark={handleToggleBookmark}
               problems={problems}
+              onOpenAddQuestion={() => handleOpenAddQuestion('language', selectedLanguage)}
             />
           )}
 
@@ -474,6 +502,7 @@ export default function App() {
               isLoading={isLoadingProblems}
               error={problemsError}
               onRetry={loadPublishedProblems}
+              onOpenAddQuestion={() => handleOpenAddQuestion('dsa', undefined, selectedTopic !== 'All' ? selectedTopic : 'Arrays')}
             />
           )}
 
@@ -644,6 +673,16 @@ export default function App() {
         {currentScreen !== 'problem_detail' && (
           <Footer onNavigate={handleNavigate} />
         )}
+
+        {/* Creator / Admin Add Question Modal */}
+        <AdminAddQuestionModal
+          isOpen={isAddQuestionOpen}
+          onClose={() => setIsAddQuestionOpen(false)}
+          onProblemAdded={handleProblemAdded}
+          initialCategory={addQuestionCategory}
+          initialLanguage={addQuestionLanguage}
+          initialDsaTopic={addQuestionDsaTopic}
+        />
 
       </div>
     </ThemeProvider>

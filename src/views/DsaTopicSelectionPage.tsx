@@ -33,15 +33,18 @@ export const DsaTopicSelectionPage: React.FC<DsaTopicSelectionPageProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'high_yield' | 'core'>('all');
 
+  // STRICT SEPARATION: Only consider DSA Practice problems for topic counts
+  const dsaProblems = problems.filter((p) => p.contentType !== 'language');
+
   const getTopicQuestionCount = (topicName: string, fallbackCount: number) => {
-    if (!problems || problems.length === 0) return fallbackCount;
-    const dbCount = problems.filter((p) => matchesTopic(p.topics || [p.topic], topicName)).length;
+    if (!dsaProblems || dsaProblems.length === 0) return fallbackCount;
+    const dbCount = dsaProblems.filter((p) => matchesTopic(p.topics || [p.topic], topicName)).length;
     return dbCount > 0 ? dbCount : fallbackCount;
   };
 
   const getTopicSolvedCount = (topicName: string, fallbackSolved: number) => {
-    if (!problems || problems.length === 0) return fallbackSolved;
-    const matching = problems.filter((p) => matchesTopic(p.topics || [p.topic], topicName));
+    if (!dsaProblems || dsaProblems.length === 0) return fallbackSolved;
+    const matching = dsaProblems.filter((p) => matchesTopic(p.topics || [p.topic], topicName));
     if (matching.length === 0) return fallbackSolved;
     return matching.filter((p) => solvedIds.includes(p.id)).length;
   };

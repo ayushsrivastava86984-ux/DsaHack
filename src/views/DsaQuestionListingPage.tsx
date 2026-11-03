@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   RotateCcw,
   RefreshCw,
-  Hash
+  Hash,
+  Plus
 } from 'lucide-react';
 
 interface DsaQuestionListingPageProps {
@@ -29,6 +30,7 @@ interface DsaQuestionListingPageProps {
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  onOpenAddQuestion?: () => void;
 }
 
 export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
@@ -43,6 +45,7 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
   isLoading = false,
   error = null,
   onRetry,
+  onOpenAddQuestion,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'All' | Difficulty>('All');
@@ -52,13 +55,18 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
   const companies = ['All', 'Google', 'Meta', 'Amazon', 'Microsoft', 'Apple', 'Netflix', 'Uber'];
 
-  // Dynamically compute unique topics from fetched database problems + standard syllabus topics
+  // STRICT SEPARATION: Only include pure DSA Practice questions (never language practice questions)
+  const dsaProblems = useMemo(() => {
+    return problems.filter((p) => p.contentType !== 'language');
+  }, [problems]);
+
+  // Dynamically compute unique topics from fetched DSA problems + standard syllabus topics
   const dynamicTopics = useMemo(() => {
     const list: string[] = ['All', 'Arrays', 'Strings', 'Linked List'];
     const set = new Set<string>();
     list.forEach((t) => set.add(t));
 
-    problems.forEach((p) => {
+    dsaProblems.forEach((p) => {
       (p.topics && p.topics.length > 0 ? p.topics : [p.topic]).forEach((t) => {
         if (t && t.trim()) set.add(t.trim());
       });
@@ -66,7 +74,7 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
 
     DSA_TOPICS.forEach((t) => set.add(t.name));
     return Array.from(set);
-  }, [problems]);
+  }, [dsaProblems]);
 
   const handleRefresh = async () => {
     if (onRetry) {
@@ -76,7 +84,7 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
     }
   };
 
-  const filteredProblems = problems.filter((p) => {
+  const filteredProblems = dsaProblems.filter((p) => {
     // Only published problems visible to students
     if (p.isPublished === false) return false;
 
@@ -141,7 +149,7 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
                 {selectedTopic === 'All' || selectedTopic === 'All Problems' ? 'All Practice Problems' : `${selectedTopic} Track`}
               </h1>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D8EEDC] text-emerald-950 font-mono">
-                {filteredProblems.length} of {problems.length} {problems.length === 1 ? 'Question' : 'Questions'}
+                {filteredProblems.length} of {dsaProblems.length} {dsaProblems.length === 1 ? 'Question' : 'Questions'}
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -150,8 +158,19 @@ export const DsaQuestionListingPage: React.FC<DsaQuestionListingPageProps> = ({
           </div>
         </div>
 
-        {/* Topic Selector & Refresh */}
+        {/* Topic Selector, Add Question & Refresh */}
         <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100 dark:border-gray-800">
+          {onOpenAddQuestion && (
+            <button
+              onClick={onOpenAddQuestion}
+              className="px-3 py-2 rounded-xl neo-border-sm bg-[#F4A6C1] text-xs font-black text-[#171717] flex items-center gap-1.5 hover:bg-[#ee8fae] transition-colors shadow-[1.5px_1.5px_0px_0px_#171717]"
+              title="Add a new question"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Question</span>
+            </button>
+          )}
+
           <button
             onClick={handleRefresh}
             disabled={isLoading || isRefreshing}
