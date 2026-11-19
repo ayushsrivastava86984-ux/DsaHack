@@ -554,21 +554,54 @@ VALUES (
 }
 
 /**
+ * Detects transient browser network/fetch errors (offline, blocked, paused project)
+ */
+function isNetworkFetchError(err: unknown): boolean {
+  const msg =
+    err instanceof Error
+      ? err.message
+      : typeof err === 'object' && err !== null && 'message' in err
+      ? String((err as { message?: unknown }).message ?? '')
+      : String(err ?? '');
+  return /failed to fetch|networkerror|load failed|fetch failed|enotfound/i.test(msg);
+}
+
+/**
  * Fetches all published problems from Supabase public.problems table
  */
 export async function fetchPublishedProblems(): Promise<{
   problems: Problem[];
   error: Error | null;
 }> {
-  try {
-    console.log('[Supabase problemsService] Fetching published questions from public.problems (is_published = true)...');
-    const { data, error } = await supabase
+  const runQuery = () =>
+    supabase
       .from('problems')
       .select('*')
       .eq('is_published', true);
 
+  try {
+    console.log('[Supabase problemsService] Fetching published questions from public.problems (is_published = true)...');
+    let { data, error } = await runQuery();
+
+    // Retry once on transient network/fetch failure
+    if (error && isNetworkFetchError(error)) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      const retryRes = await runQuery();
+      data = retryRes.data;
+      error = retryRes.error;
+    }
+
     if (error) {
-      console.error('[Supabase problemsService] Error querying public.problems:', error);
+      if (isNetworkFetchError(error)) {
+        console.warn('[Supabase problemsService] Network error reaching Supabase public.problems:', error.message);
+        return {
+          problems: [],
+          error: new Error(
+            'Unable to connect to Supabase right now. Please check your internet connection or Supabase project status and click Retry.'
+          ),
+        };
+      }
+      console.warn('[Supabase problemsService] Error querying public.problems:', error.message);
       return { problems: [], error: new Error(error.message || 'Database query error') };
     }
 
@@ -592,8 +625,17 @@ export async function fetchPublishedProblems(): Promise<{
     console.log(`[Supabase problemsService] Successfully fetched and parsed ${mapped.length} published problems from Supabase.`);
     return { problems: mapped, error: null };
   } catch (err) {
+    if (isNetworkFetchError(err)) {
+      console.warn('[Supabase problemsService] Network error while fetching problems:', err);
+      return {
+        problems: [],
+        error: new Error(
+          'Unable to connect to Supabase right now. Please check your internet connection or Supabase project status and click Retry.'
+        ),
+      };
+    }
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[Supabase problemsService] Unexpected error while fetching problems:', err);
+    console.warn('[Supabase problemsService] Unexpected error while fetching problems:', message);
     return { problems: [], error: new Error(message) };
   }
 }
@@ -617,7 +659,7 @@ export async function fetchProblemByIdOrSlug(idOrProblemId: string): Promise<{
 
     const { data, error } = await query.limit(1);
     if (error) {
-      console.error('[Supabase problemsService] Error fetching problem detail:', error);
+      console.warn('[Supabase problemsService] Error fetching problem detail:', error.message);
       return { problem: null, error: new Error(error.message) };
     }
 
