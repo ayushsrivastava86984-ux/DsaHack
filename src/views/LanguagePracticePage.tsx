@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
 import { ScreenId, Language, Problem } from '../types';
-import { PROGRAMMING_LANGUAGES, INITIAL_PROBLEMS } from '../data/mockData';
-import { 
-  Search, 
-  Filter, 
-  ArrowLeft, 
-  Bookmark, 
-  CheckCircle2, 
-  Play, 
-  Code2, 
-  Sparkles,
-  Layers,
-  ChevronRight
+import { PROGRAMMING_LANGUAGES } from '../data/mockData';
 import { resolveLanguage } from '../services/problemsService';
 import { 
   Search, 

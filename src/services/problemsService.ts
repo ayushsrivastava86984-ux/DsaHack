@@ -176,8 +176,13 @@ export function parseTopics(raw: unknown): string[] {
  */
 export function cleanTopicName(s: string): string {
   let str = (s || '').toLowerCase().trim();
+  if (!str) return '';
   if (str.includes('linked') && str.includes('list')) return 'linkedlist';
-  // Remove plural 's' at the end ('arrays' -> 'array', 'strings' -> 'string', 'stacks' -> 'stack')
+  if (str.includes('binary') && str.includes('search') && str.includes('tree')) return 'binarysearchtree';
+  if (str === 'bst' || str === 'bsts') return 'binarysearchtree';
+  if (str.includes('greedy')) return 'greedy';
+  if (str === 'dp' || str.includes('dynamic programming')) return 'dynamicprogramming';
+  // Remove plural 's' at the end ('arrays' -> 'array', 'strings' -> 'string', 'stacks' -> 'stack', 'trees' -> 'tree')
   str = str.replace(/s$/, '');
   return str.replace(/[^a-z0-9]/g, '');
 }
@@ -187,7 +192,7 @@ export function cleanTopicName(s: string): string {
  * Supports:
  * - 'All' / 'All Problems' -> matches all
  * - Multi-topic questions appear in every matching topic section.
- * - Handles 'Linked List' vs 'Linked Lists', 'Array' vs 'Arrays', etc.
+ * - Handles 'Linked List' vs 'Linked Lists', 'Array' vs 'Arrays', 'Greedy' vs 'Greedy Algorithms', etc.
  */
 export function matchesTopic(topics: string[], filterTopic: string): boolean {
   if (!filterTopic || filterTopic === 'All' || filterTopic === 'All Problems') {
@@ -197,10 +202,7 @@ export function matchesTopic(topics: string[], filterTopic: string): boolean {
   const target = cleanTopicName(filterTopic);
   if (!target) return true;
 
-  return (topics || []).some((t) => {
-    const cand = cleanTopicName(t);
-    return cand === target || cand.includes(target) || target.includes(cand);
-  });
+  return (topics || []).some((t) => cleanTopicName(t) === target);
 }
 
 /**
