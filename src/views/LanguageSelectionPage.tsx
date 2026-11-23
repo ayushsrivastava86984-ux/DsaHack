@@ -1,6 +1,7 @@
 import React from 'react';
-import { ScreenId, Language } from '../types';
+import { ScreenId, Language, Problem } from '../types';
 import { PROGRAMMING_LANGUAGES } from '../data/mockData';
+import { resolveLanguage } from '../services/problemsService';
 import { 
   ArrowRight, 
   Code2, 
@@ -11,9 +12,6 @@ import {
   Layers,
   Cpu
 } from 'lucide-react';
-
-import { Problem } from '../types';
-import { resolveLanguage } from '../services/problemsService';
 
 interface LanguageSelectionPageProps {
   onNavigate: (screen: ScreenId) => void;
